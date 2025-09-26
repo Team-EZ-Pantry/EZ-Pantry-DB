@@ -15,15 +15,15 @@ CREATE TABLE product (
     barcode TEXT UNIQUE,
     product_name TEXT NOT NULL,
     brand TEXT,
-	  image_url TEXT,
-	  categories TEXT[],
-	  allergens TEXT[],
-	  calories_per_100g DECIMAL(10,2),
-	  protein_per_100g DECIMAL(10,2),
-	  carbs_per_100g DECIMAL(10,2),
-	  fat_per_100g DECIMAL(10,2),
-	  nutrition JSONB,
-	  created_at TIMESTAMP DEFAULT NOW()
+	image_url TEXT,
+	categories TEXT[],
+	allergens TEXT[],
+	calories_per_100g DECIMAL(10,2),
+	protein_per_100g DECIMAL(10,2),
+	carbs_per_100g DECIMAL(10,2),
+	fat_per_100g DECIMAL(10,2),
+	nutrition JSONB,
+	created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE pantry_product (
