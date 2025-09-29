@@ -1,4 +1,4 @@
-# EZ Pantry Backend API
+# EZ Pantry Database and Backend API
 
 ## Table of Contents
 - [Quick Start](#-quick-start)
