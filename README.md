@@ -15,7 +15,7 @@
 ### Installation
 ```bash
 git clone https://github.com/Team-EZ-Pantry/EZ-Pantry-DB.git
-cd EZ-Pantry-DB
+cd EZ-Pantry-DB/server
 npm install
 ```
 
