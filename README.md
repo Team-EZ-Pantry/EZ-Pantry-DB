@@ -1,8 +1,8 @@
 # EZ Pantry Backend API
 
-## 📋 Table of Contents
+## Table of Contents
 - [Quick Start](#-quick-start)
-- [API Docs](#-api-documentation)
+- [API Docs](#-api-docs)
   - [Health Check](#health-check)
 
 
@@ -20,7 +20,7 @@ npm install
 ```
 
 ### Environment Setup
-```env
+```.env file
 DB_USER=devuser
 DB_PASSWORD=devpass
 DB_HOST=localhost
