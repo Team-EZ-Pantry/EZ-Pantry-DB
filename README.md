@@ -35,29 +35,8 @@ APP_PORT=3000
 ```
 http://localhost:3000
 ```
-
-### Health Check
-**GET** `/health`
-
-Check server and database status.
-
-**Response:**
-```json
-{
-  "status": "healthy",
-  "timestamp": "2024-01-15T10:30:00.000Z"
-}
-```
-
-## Base URL
-```
-http://localhost:3000
-```
-
 ## Authentication
 *not here yet*
-
-## Endpoints
 
 ### Health Check
 **GET** `/health`
