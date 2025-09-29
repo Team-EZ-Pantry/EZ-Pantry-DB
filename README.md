@@ -49,23 +49,6 @@ Check server and database status.
 }
 ```
 
-## 🏗️ Project Structure
-```
-EZ-Pantry-DB/
-├── index.js          # Main server file
-├── .env              # Environment variables
-├── package.json
-└── README.md
-```
-
-## 💻 Development
-```bash
-npm run dev
-```
-
-## 👥 Team
-- Your Name - Backend Developer
-
 ## Base URL
 ```
 http://localhost:3000
