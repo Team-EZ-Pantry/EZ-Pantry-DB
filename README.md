@@ -2,7 +2,7 @@
 
 ## Table of Contents
 - [Quick Start](#-quick-start)
-- [API Docs](#-api-docs)
+- [API Docs](#api-docs)
   - [Health Check](#health-check)
 
 
