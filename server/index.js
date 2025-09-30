@@ -42,6 +42,13 @@ app.get('/health', async (req, res) => {
 });
 
 // *************************************
+// *           API Routes              *
+// *************************************
+// Contains register, 
+const initializeAuthRoutes = require('./routes/auth');
+app.use('/api/auth', initializeAuthRoutes(pool));
+
+// *************************************
 // *     Application Startup Logic     *
 // *************************************
 async function startServer() {
@@ -52,7 +59,7 @@ async function startServer() {
 
     // Start listening for incoming requests
     app.listen(PORT, () => {
-      console.log("Server running at http://localhost:${PORT}");
+      console.log(`Server running at http://localhost:${PORT}`);
     });
   } catch (err) {
     console.error('Failed to connect to database:', err.message);
