@@ -68,7 +68,7 @@ Check if the server and database are running.
 }
 ```
 
-## Status Codes
+#### Status Codes
 - `200` - Success
 - `503` - Service Unavailable (database issues)
 
