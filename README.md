@@ -50,7 +50,7 @@ http://localhost:3000
 ## Health Check
 **GET** `/health`
 
-Check if the server and database are running.
+Check if the server and database are running. Append to end of url like this: ``http://localhost:3000/health``
 
 **Response:**
 ```json
