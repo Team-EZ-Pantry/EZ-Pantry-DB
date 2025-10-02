@@ -11,9 +11,11 @@
 ## Quick Start
 
 ### Prerequisites
+dev
 - Node.js
 - Postgres
 - Make sure you're up to date on any migrations (database/migrations)
+
 
 ### Installation
 ```bash
@@ -23,6 +25,7 @@ npm install
 ```
 
 ### Environment Setup
+dev
 Create an ".env" file (that's the full name) inside the server folder. \
 This allows nodejs to connect to our database with the credentials we created
 ```.env file
@@ -34,6 +37,7 @@ DB_NAME=postgres
 APP_PORT=3000
 ```
 
+dev
 ### Starting the server
 inside EZ-Pantry-DB/server, run ```node index.js```. (FYI, Press ctrl + c to stop the server) \
 *Remember to have postgres running on docker if you're using APIs that access the database*
@@ -47,10 +51,11 @@ http://localhost:3000
 ## Authentication
 *not here yet*
 
-## Health Check
+
+### Health Check
 **GET** `/health`
 
-Check if the server and database are running.
+Check if the server is running.
 
 **Response:**
 ```json
