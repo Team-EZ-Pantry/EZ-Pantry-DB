@@ -69,7 +69,7 @@ router.post('/register', async (req, res) => {
     if (userCheck.rows.length > 0) {
       return res.status(409).json({ 
         error: 'User with this email already exists' // I'm thinking we should allow duplicate usernames for user convenience
-      });
+      });                                            // wes: if we go by just emails, then we would would most likely not allow duplicates.
     }
 
     // Hash the password
