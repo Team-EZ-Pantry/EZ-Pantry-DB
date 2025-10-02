@@ -48,6 +48,8 @@ app.get('/health', async (req, res) => {
 const initializeAuthRoutes = require('./routes/auth');
 app.use('/api/auth', initializeAuthRoutes(pool));
 
+const pantryRoutes = require('./routes/pantry');
+app.use('/', pantryRoutes);
 // *************************************
 // *     Application Startup Logic     *
 // *************************************
