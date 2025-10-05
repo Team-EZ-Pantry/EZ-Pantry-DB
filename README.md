@@ -39,7 +39,7 @@ APP_PORT=3000
 
 dev
 ### Starting the server
-inside EZ-Pantry-DB/server, run ```node index.js```. (FYI, Press ctrl + c to stop the server) \
+inside EZ-Pantry-DB/server/src, run ```node index.js```. (FYI, Press ctrl + c to stop the server) \
 *Remember to have postgres running on docker if you're using APIs that access the database*
 
 ## API Docs
