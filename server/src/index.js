@@ -1,36 +1,24 @@
 const path = require('path');
 require('dotenv').config({
   override: true,
-  path: path.join(__dirname, '.env')
-});
-
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-
-// *************************************
-// *    Database Connection Setup      *
-// *************************************
-const pool = new Pool({
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME
+  path: path.join(__dirname, '../.env')
 });
 
 // *************************************
 // *      Server Configuration         *
 // *************************************
+const express = require('express');
+const cors = require('cors');
+const pool = require('./config/database');
 const PORT = process.env.APP_PORT || 3000;
 const app = express();
-// Enable CORS for cross-origin requests
 app.use(cors());
-// Parse JSON bodies in incoming requests
+   // Enable CORS for cross-origin requests
 app.use(express.json());
+   // Parse JSON bodies in incoming requests
 
 // *************************************
-// *       Health Check Endpoint       *
+// *   DB Connection Health Endpoint   *
 // *************************************
 app.get('/health', async (req, res) => {
   try {
@@ -44,13 +32,14 @@ app.get('/health', async (req, res) => {
 // *************************************
 // *           API Routes              *
 // *************************************
-// Contains register, 
-const initializeAuthRoutes = require('./routes/auth');
-app.use('/api/auth', initializeAuthRoutes(pool));
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
 
-// *************************************
-// *     Application Startup Logic     *
-// *************************************
+
+
+
+
+// Start the server
 async function startServer() {
   try {
     // Test database connection before starting server
@@ -67,5 +56,4 @@ async function startServer() {
   }
 }
 
-// Start the server
 startServer();
