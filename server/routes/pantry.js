@@ -6,7 +6,16 @@ const router = express.Router();
 const pantryItems = [
    { id: 1, title: 'Apples', quantity: 10 },
    { id: 2, title: 'Bananas', quantity: 6 },
-   { id: 3, title: 'Carrots', quantity: 4 }
+   { id: 3, title: 'asdf', quantity: 4 },
+   { id: 3, title: 'asdf', quantity: 4 },
+   { id: 3, title: 'asdf', quantity: 4 },
+   { id: 3, title: 'asdf', quantity: 4 },
+   { id: 3, title: 'asdf', quantity: 4 },
+   { id: 3, title: 'asdf', quantity: 4 },
+   { id: 3, title: 'asdf', quantity: 4 },
+   { id: 3, title: 'asdf', quantity: 4 },
+   { id: 3, title: 'asdf', quantity: 4 },
+   { id: 3, title: 'asdf', quantity: 4 },
 ];
 
 // GET /pantry
