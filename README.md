@@ -6,6 +6,7 @@
   - [Health Check](#health-check)
   - [Authentication Endpoints](#authentication-endpoints)
     - [Register](#register)
+    - [Login](#login)
 
 
 ## Quick Start
@@ -85,7 +86,7 @@ Check if the server is running.
 
 Register a new user account in the database.
 
-#### Request Body
+#### Request Body (this will be secured by HTTPS)
 ```json
 {
   "username": "testuser",
@@ -164,4 +165,75 @@ Register a new user account in the database.
 | `201` | User successfully created |
 | `400` | Bad request (validation failed) |
 | `409` | Conflict (user already exists) |
+| `500` | Internal server error |
+
+
+### Login
+**POST** `/api/auth/login`
+
+Login with an email and password to receive a JWT.
+
+#### Request Body (this will be secured by HTTPS)
+```json
+{
+  "email": "test@gmail.com",
+  "password": "password123"
+}
+```
+
+#### Request Parameters
+| Field | Type | Required |
+|-------|------|----------|
+| `username` | string | Yes |
+| `password` | string | Yes |
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Login successful",
+    "user": {
+        "username": "testman",
+        "email": "test@gmail.com",
+        "createdAt": "2025-10-07T02:40:01.450Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiaWF0IjoxNzU5Nzg2ODI0LCJleHAiOjE3NjIzNzg4MjR9.mhz59pSTL4ymrv5orx5FNuWqu6AxhFnP9n8jBlj0pfE"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Email and password are required"
+}
+```
+
+**Code:** `401 Unauthorized` (When either email or password is missing)
+```json
+{
+    "error": "Invalid email or password"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+  "error": "An error occurred during login"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Login successful |
+| `400` | Bad request (validation failed) |
+| `401` | Unauthorized |
 | `500` | Internal server error |
