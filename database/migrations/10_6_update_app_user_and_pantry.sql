@@ -15,5 +15,6 @@ CREATE TABLE pantry (
     pantry_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES app_user(user_id) ON DELETE CASCADE,
     name TEXT NOT NULL,
+    is_default BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
