@@ -4,6 +4,7 @@
 // checkEmailExists(email) 
 // checkUsernameExists(username)
 // createUser(username, email, passwordHash)
+// findUserByEmail(email)
 
 const pool = require('../config/database');
 
@@ -42,8 +43,21 @@ async function createUser(username, email, passwordHash) {
   return result.rows[0];
 }
 
+// *************************************
+// *        Find User By Email         *
+// *************************************
+async function findUserByEmail(email) {
+  const result = await pool.query(
+    'SELECT id, username, email, password_hash, created_at FROM app_user WHERE email = $1',
+    [email]
+  );
+  return result.rows[0]; // Returns undefined if not found
+}
+
+
 module.exports = {
   checkEmailExists,
   checkUsernameExists,
-  createUser
+  createUser,
+  findUserByEmail
 };

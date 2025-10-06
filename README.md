@@ -27,7 +27,7 @@ npm install
 ### Environment Setup
 dev
 Create an ".env" file (that's the full name) inside the server folder. \
-This allows nodejs to connect to our database with the credentials we created
+This allows nodejs to connect to our database with the (placeholder) credentials we created
 ```.env file
 DB_USER=devuser
 DB_PASSWORD=devpass
@@ -35,6 +35,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=postgres
 APP_PORT=3000
+JWT_SECRET=my-dev-secret-key-12345
 ```
 
 dev
