@@ -5,8 +5,8 @@ const pantryController = require('../controllers/pantryController');
 // *************************************
 // *         Pantry Endpoints          *
 // *************************************
-router.get('/pantry', pantryController.getPantryItems);
-router.post('/pantry', pantryController.addPantryItem);
+router.get('/', pantryController.getPantryItems);
+router.post('/', pantryController.addPantryItem);
 
 
 
