@@ -7,7 +7,8 @@ const pantryController = require('../controllers/pantryController');
 // *************************************
 router.get('/', pantryController.getPantryItems);
 router.post('/', pantryController.addPantryItem);
-
+//put and patch here
+// edit and delete ?
 
 
 module.exports = router;
