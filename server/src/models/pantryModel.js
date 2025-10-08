@@ -11,11 +11,11 @@ const pool = require('../config/database');
 
 //const token = pantryController.token; // user token
 
-async function getAllItems() {
+async function getAllItems(user_id) {
   console.log('Connecting to DB:', process.env.DB_NAME);
   const result = await pool.query(
-    'SELECT * FROM pantry',
-    //[userId]
+    'SELECT * FROM pantry where user_id = $1',
+    [user_id]
   );
   console.log('Query result:', result.rows);
   return result.rows;
@@ -31,7 +31,57 @@ async function addItem(user_id, name, quantity) {
   return result.rows[0];
 }
 
+async function updateItem(user_id, item_id, name, quantity) {
+  console.log('Connecting to DB:', process.env.DB_NAME);
+
+  const updates = [];
+  const values = [];
+  let index = 1;
+
+  if (name !== undefined) {
+    updates.push(`name = $${index++}`);
+    values.push(name);
+  }
+
+  if (quantity !== undefined) {
+    updates.push(`quantity = $${index++}`);
+    values.push(quantity);
+  }
+
+  if (updates.length === 0) {
+    console.log('No fields provided to update.');
+    return null;
+  }
+
+  // Add identifiers for WHERE clause
+  values.push(user_id);
+  values.push(item_id);
+
+  const query = `
+    UPDATE pantry
+    SET ${updates.join(', ')}
+    WHERE user_id = $${index++} AND pantry_id = $${index}
+    RETURNING *;
+  `;
+
+  const result = await pool.query(query, values);
+  console.log('Query result:', result.rows);
+  return result.rows[0];
+}
+
+async function deletePantryItem(user_id, item_id) {
+  console.log('Connecting to DB:', process.env.DB_NAME);
+  const result = await pool.query(
+    'DELETE FROM pantry WHERE user_id = $1 AND pantry_id = $2 RETURNING *',
+    [user_id, item_id]
+  );
+  console.log('Query result:', result.rows);
+  return result.rows[0];
+}
+
 module.exports = {
   getAllItems,
-  addItem
+  addItem,
+  updateItem,
+  deletePantryItem
 };
