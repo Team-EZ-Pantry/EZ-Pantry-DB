@@ -13,13 +13,36 @@ const pool = require('../config/database');
 
 async function getAllItems(user_id) {
   console.log('Connecting to DB:', process.env.DB_NAME);
+
   const result = await pool.query(
-    'SELECT * FROM pantry where user_id = $1',
+    `
+    SELECT 
+      p.pantry_id,
+      p.quantity,
+      p.product_id,
+      COALESCE(pr.product_name, p.name) AS display_name,  -- Use product name if available, else pantry item name
+      pr.barcode,
+      pr.brand,
+      pr.image_url,
+      pr.categories,
+      pr.allergens,
+      pr.calories_per_100g,
+      pr.protein_per_100g,
+      pr.carbs_per_100g,
+      pr.fat_per_100g,
+      pr.nutrition
+    FROM pantry p
+    LEFT JOIN product pr ON p.product_id = pr.product_id
+    WHERE p.user_id = $1
+    ORDER BY display_name ASC
+    `,
     [user_id]
   );
+
   console.log('Query result:', result.rows);
   return result.rows;
 }
+
   
 async function addItem(user_id, name, quantity) {
   console.log('Connecting to DB:', process.env.DB_NAME);
