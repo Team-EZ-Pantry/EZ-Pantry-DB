@@ -44,6 +44,18 @@ async function createUser(username, email, passwordHash) {
 }
 
 // *************************************
+// *         Find User By ID           *
+// *************************************
+async function findUserById(user_id) {
+  const result = await pool.query(
+    'SELECT user_id, username, email, password_hash, created_at FROM app_user WHERE user_id = $1',
+    [user_id]
+  );
+  return result.rows[0]; // Returns undefined if not found
+}
+
+
+// *************************************
 // *        Find User By Email         *
 // *************************************
 async function findUserByEmail(email) {
@@ -59,5 +71,6 @@ module.exports = {
   checkEmailExists,
   checkUsernameExists,
   createUser,
+  findUserById,
   findUserByEmail
 };

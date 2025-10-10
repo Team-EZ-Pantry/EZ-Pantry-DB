@@ -72,7 +72,7 @@ async function register(req, res) {
     res.status(201).json({
       message: 'User registered successfully',
       user: {
-        id: newUser.id,
+        user_id: newUser.user_id,
         username: newUser.username,
         email: newUser.email,
         createdAt: newUser.created_at
@@ -128,13 +128,13 @@ async function login(req, res) {
    }
 
    // Password is correct: Generate JWT token
-   const token = generateToken(user.id, user.email);
+   const token = generateToken(user.user_id, user.email);
 
    // Send response
    res.json({
      message: 'Login successful',
      user: {
-       id: user.id,
+       user_id: user.user_id,
        username: user.username,
        email: user.email,
        createdAt: user.created_at
@@ -150,7 +150,39 @@ async function login(req, res) {
  }
 }
 
+// *************************************
+// *      Get Current User Info        *
+// *************************************
+async function getMe(req, res) {
+  try {
+    // req.user is set by authenticateToken middleware
+    // It contains: { user_id, email, iat, exp }
+    const user_id = req.user.user_id;
+
+    // Fetch fresh user data from database
+    const user = await userModel.findUserById(user_id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      message: 'User data retrieved successfully',
+      user: {
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.created_at
+      }
+    });
+  } catch (err) {
+    console.error('Get user error:', err);
+    res.status(500).json({ error: 'Failed to fetch user data' });
+  }
+}
+
 module.exports = {
   register,
-  login
+  login,
+  getMe
 };

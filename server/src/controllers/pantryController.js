@@ -1,14 +1,8 @@
 const pantryModel = require('../models/pantryModel');
-const authController = require('../controllers/authController');
-
-const token = authController.token; // user token
 
 // *************************************
 // *         Pantry Controller         *
 // *************************************
-
-// need to send user token along with get request ?
-
 async function getPantryItems (req, res) {
   try {
     const items = await pantryModel.getAllItems();
