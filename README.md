@@ -7,16 +7,15 @@
   - [Authentication Endpoints](#authentication-endpoints)
     - [Register](#register)
     - [Login](#login)
+    - [Me 🔒](#me)
 
 
 ## Quick Start
 
 ### Prerequisites
-dev
 - Node.js
 - Postgres
 - Make sure you're up to date on any migrations (database/migrations)
-
 
 ### Installation
 ```bash
@@ -26,8 +25,7 @@ npm install
 ```
 
 ### Environment Setup
-dev
-Create an ".env" file (that's the full name) inside the server folder. \
+Create an ".env" file inside the server folder. \
 This allows nodejs to connect to our database with the (placeholder) credentials we created
 ```.env file
 DB_USER=devuser
@@ -39,10 +37,9 @@ APP_PORT=3000
 JWT_SECRET=my-dev-secret-key-12345
 ```
 
-dev
 ### Starting the server
-inside EZ-Pantry-DB/server/src, run ```node index.js```. (FYI, Press ctrl + c to stop the server) \
-*Remember to have postgres running on docker if you're using APIs that access the database*
+inside EZ-Pantry-DB/server/src, run ```node index.js```. (Press ctrl + C to stop the server) \
+*Remember to have Postgres running on docker*
 
 ## API Docs
 
@@ -50,9 +47,8 @@ inside EZ-Pantry-DB/server/src, run ```node index.js```. (FYI, Press ctrl + c to
 ```
 http://localhost:3000
 ```
-## Authentication
-*not here yet*
-
+## Authentication 🔒
+Bearer {token}
 
 ### Health Check
 **GET** `/health`
@@ -236,4 +232,80 @@ Login with an email and password to receive a JWT.
 | `200` | Login successful |
 | `400` | Bad request (validation failed) |
 | `401` | Unauthorized |
+| `500` | Internal server error |
+
+### Me
+**GET** `/api/auth/me` 🔒
+
+Protected route - Get the current user's information.
+
+#### Request Body 
+None
+
+#### Request Header
+Authorization: Bearer user.token.here
+
+Example:
+```
+curl -X GET http://localhost:3000/api/auth/me \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "User data retrieved successfully",
+    "user": {
+        "user_id": 1,
+        "username": "testman",
+        "email": "test@gmail.com",
+        "createdAt": "2025-10-07T02:40:01.450Z"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "User not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+  "error": "Failed to fetch user data"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Me request successful |
+| `401` | Unauthorized |
+| `403` | Forbidden |
+| `404` | User not found |
 | `500` | Internal server error |
