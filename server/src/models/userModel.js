@@ -1,3 +1,5 @@
+const pool = require('../config/database');
+
 // *************************************
 // *      User-related functions       *
 // *************************************
@@ -5,8 +7,6 @@
 // checkUsernameExists(username)
 // createUser(username, email, passwordHash)
 // findUserByEmail(email)
-
-const pool = require('../config/database');
 
 // *************************************
 // *    Check if user email exists     *
@@ -46,10 +46,10 @@ async function createUser(username, email, passwordHash) {
 // *************************************
 // *         Find User By ID           *
 // *************************************
-async function findUserById(user_id) {
+async function findUserById(userId) {
   const result = await pool.query(
     'SELECT user_id, username, email, password_hash, created_at FROM app_user WHERE user_id = $1',
-    [user_id]
+    [userId]
   );
   return result.rows[0]; // Returns undefined if not found
 }

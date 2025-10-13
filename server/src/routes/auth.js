@@ -8,8 +8,6 @@ const { authenticateToken } = require('../middleware/auth');
 // *************************************
 router.post('/register', authController.register);
 router.post('/login', authController.login);
-
-// PROTECTED route - requires valid token
 router.get('/me', authenticateToken, authController.getMe);
 
 module.exports = router;

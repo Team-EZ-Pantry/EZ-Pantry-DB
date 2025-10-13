@@ -1,110 +1,159 @@
-// *************************************
-// *      User-related functions       *
-// *************************************
-// get user's pantry items
-// add item to user's pantry
-// remove item from user's pantry
-// update item in user's pantry
-
-//const pantryController = require('../controllers/pantryController');
 const pool = require('../config/database');
 
-//const token = pantryController.token; // user token
+// Super comment
 
-async function getAllItems(user_id) {
-  console.log('Connecting to DB:', process.env.DB_NAME);
 
+// *************************************
+// *    Pantry Management Functions    *
+// *************************************
+
+// Get all pantries for a specific user
+async function getPantriesByUserId(userId) {
   const result = await pool.query(
-    `
-    SELECT 
-      p.pantry_id,
-      p.quantity,
-      p.product_id,
-      COALESCE(pr.product_name, p.name) AS display_name,  -- Use product name if available, else pantry item name
-      pr.barcode,
-      pr.brand,
-      pr.image_url,
-      pr.categories,
-      pr.allergens,
-      pr.calories_per_100g,
-      pr.protein_per_100g,
-      pr.carbs_per_100g,
-      pr.fat_per_100g,
-      pr.nutrition
-    FROM pantry p
-    LEFT JOIN product pr ON p.product_id = pr.product_id
-    WHERE p.user_id = $1
-    ORDER BY display_name ASC
-    `,
-    [user_id]
+    'SELECT * FROM pantry WHERE user_id = $1 ORDER BY created_at DESC',
+    [userId]
   );
-
-  console.log('Query result:', result.rows);
   return result.rows;
 }
 
-  
-async function addItem(user_id, name, quantity) {
-  console.log('Connecting to DB:', process.env.DB_NAME);
-  const result = await pool.query(
-    'INSERT INTO pantry (user_id, name, quantity) VALUES ($1, $2, $3) RETURNING *',
-    [user_id, name, quantity]
+// Get a specific pantry with ALL its products
+async function getPantryWithProducts(pantryId, userId) {
+  // First, verify this pantry belongs to this user (security!)
+  const pantry = await pool.query(
+    'SELECT * FROM pantry WHERE pantry_id = $1 AND user_id = $2',
+    [pantryId, userId]
   );
-  console.log('Query result:', result.rows);
+
+  if (pantry.rows.length === 0) {
+    return null; // Pantry not found or doesn't belong to user
+  }
+
+  // Get all products in this pantry
+  const products = await pool.query(
+    `SELECT 
+      p.product_id,
+      p.product_name,
+      p.brand,
+      p.barcode,
+      p.image_url,
+      p.calories_per_100g,
+      pp.quantity,
+      pp.expiration_date
+    FROM pantry_product pp
+    JOIN product p ON pp.product_id = p.product_id
+    WHERE pp.pantry_id = $1
+    ORDER BY p.product_name ASC`,
+    [pantryId]
+  );
+
+  return {
+    ...pantry.rows[0],
+    products: products.rows
+  };
+}
+
+// Create a new pantry for a user
+async function createPantry(userId, name) {
+  const result = await pool.query(
+    'INSERT INTO pantry (user_id, name) VALUES ($1, $2) RETURNING *',
+    [userId, name]
+  );
   return result.rows[0];
 }
 
-async function updateItem(user_id, item_id, name, quantity) {
-  console.log('Connecting to DB:', process.env.DB_NAME);
-
-  const updates = [];
-  const values = [];
-  let index = 1;
-
-  if (name !== undefined) {
-    updates.push(`name = $${index++}`);
-    values.push(name);
-  }
-
-  if (quantity !== undefined) {
-    updates.push(`quantity = $${index++}`);
-    values.push(quantity);
-  }
-
-  if (updates.length === 0) {
-    console.log('No fields provided to update.');
-    return null;
-  }
-
-  // Add identifiers for WHERE clause
-  values.push(user_id);
-  values.push(item_id);
-
-  const query = `
-    UPDATE pantry
-    SET ${updates.join(', ')}
-    WHERE user_id = $${index++} AND pantry_id = $${index}
-    RETURNING *;
-  `;
-
-  const result = await pool.query(query, values);
-  console.log('Query result:', result.rows);
+// Update pantry name
+async function updatePantry(pantryId, userId, name) {
+  const result = await pool.query(
+    'UPDATE pantry SET name = $1 WHERE pantry_id = $2 AND user_id = $3 RETURNING *',
+    [name, pantryId, userId]
+  );
   return result.rows[0];
 }
 
-async function deletePantryItem(user_id, item_id) {
-  console.log('Connecting to DB:', process.env.DB_NAME);
+// Delete a pantry
+async function deletePantry(pantryId, userId) {
   const result = await pool.query(
-    'DELETE FROM pantry WHERE user_id = $1 AND pantry_id = $2 RETURNING *',
-    [user_id, item_id]
+    'DELETE FROM pantry WHERE pantry_id = $1 AND user_id = $2 RETURNING *',
+    [pantryId, userId]
   );
-  console.log('Query result:', result.rows);
+  return result.rows[0];
+}
+
+// *************************************
+// * Pantry Product Functions          *
+// *************************************
+
+/*
+ * Add a product to a pantry
+ * If product exists, increment quantity
+ * If product doesn't exist, create it in pantry_product
+ */
+async function addProductToPantry(pantryId, productId, quantity, expirationDate) {
+  // Check if product already in this pantry
+  const exists = await pool.query(
+    'SELECT * FROM pantry_product WHERE pantry_id = $1 AND product_id = $2',
+    [pantryId, productId]
+  );
+
+  if (exists.rows.length > 0) {
+    // Product already exists, update quantity
+    const result = await pool.query(
+      'UPDATE pantry_product SET quantity = quantity + $1, expiration_date = $2 WHERE pantry_id = $3 AND product_id = $4 RETURNING *',
+      [quantity, expirationDate, pantryId, productId]
+    );
+    return result.rows[0];
+  } else {
+    // New product for this pantry
+    const result = await pool.query(
+      'INSERT INTO pantry_product (pantry_id, product_id, quantity, expiration_date) VALUES ($1, $2, $3, $4) RETURNING *',
+      [pantryId, productId, quantity, expirationDate]
+    );
+    return result.rows[0];
+  }
+}
+
+// Remove a product from pantry
+async function removeProductFromPantry(pantryId, productId) {
+  const result = await pool.query(
+    'DELETE FROM pantry_product WHERE pantry_id = $1 AND product_id = $2 RETURNING *',
+    [pantryId, productId]
+  );
+  return result.rows[0];
+}
+
+// Update product quantity in pantry
+async function updateProductQuantity(pantryId, productId, quantity) {
+  if (quantity <= 0) {
+    // Delete if quantity is 0 or less
+    return await removeProductFromPantry(pantryId, productId);
+  }
+
+  const result = await pool.query(
+    'UPDATE pantry_product SET quantity = $1 WHERE pantry_id = $2 AND product_id = $3 RETURNING *',
+    [quantity, pantryId, productId]
+  );
+  return result.rows[0];
+}
+
+// Update product expiration date
+async function updateProductExpiration(pantryId, productId, expirationDate) {
+  const result = await pool.query(
+    'UPDATE pantry_product SET expiration_date = $1 WHERE pantry_id = $2 AND product_id = $3 RETURNING *',
+    [expirationDate, pantryId, productId]
+  );
   return result.rows[0];
 }
 
 module.exports = {
-  getAllItems,
-  addItem,
-  updateItem,
-  deletePantryItem
+  // Pantry management
+  getPantriesByUserId,
+  getPantryWithProducts,
+  createPantry,
+  updatePantry,
+  deletePantry,
+  // Product management
+  addProductToPantry,
+  removeProductFromPantry,
+  updateProductQuantity,
+  updateProductExpiration
 };

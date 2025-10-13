@@ -1,8 +1,6 @@
 // *************************************
 // *    Aunthentication Controllers    *
 // *************************************
-// Register
-// Login
 
 const bcrypt = require('bcrypt');
 const userModel = require('../models/userModel');
@@ -72,7 +70,7 @@ async function register(req, res) {
     res.status(201).json({
       message: 'User registered successfully',
       user: {
-        user_id: newUser.user_id,
+        userId: newUser.user_id,
         username: newUser.username,
         email: newUser.email,
         createdAt: newUser.created_at
@@ -134,7 +132,7 @@ async function login(req, res) {
    res.json({
      message: 'Login successful',
      user: {
-       user_id: user.user_id,
+       userId: user.user_id,
        username: user.username,
        email: user.email,
        createdAt: user.created_at
@@ -156,11 +154,11 @@ async function login(req, res) {
 async function getMe(req, res) {
   try {
     // req.user is set by authenticateToken middleware
-    // It contains: { user_id, email, iat, exp }
-    const user_id = req.user.user_id;
+    // It contains: { userId, email, iat, exp }
+    const userId = req.user.userId;
 
     // Fetch fresh user data from database
-    const user = await userModel.findUserById(user_id);
+    const user = await userModel.findUserById(userId);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -169,7 +167,7 @@ async function getMe(req, res) {
     res.json({
       message: 'User data retrieved successfully',
       user: {
-        user_id: user.user_id,
+        userId: user.user_id,
         username: user.username,
         email: user.email,
         createdAt: user.created_at

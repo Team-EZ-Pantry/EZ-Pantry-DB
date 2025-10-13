@@ -42,7 +42,7 @@ function authenticateToken(req, res, next) {
     const decoded = verifyToken(token);
 
     // Step 5: Token is valid, add user info to request object
-    // decoded contains: { user_id, email, iat, exp }
+    // decoded contains: { userId, email, iat, exp }
     req.user = decoded;
 
     // Step 6: Call next() to continue to the next middleware/controller

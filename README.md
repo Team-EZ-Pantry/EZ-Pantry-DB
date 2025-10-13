@@ -304,7 +304,7 @@ curl -X GET http://localhost:3000/api/auth/me \
 #### Status Codes
 | Code | Description |
 |------|-------------|
-| `200` | Me request successful |
+| `200` | Get request successful |
 | `401` | Unauthorized |
 | `403` | Forbidden |
 | `404` | User not found |
