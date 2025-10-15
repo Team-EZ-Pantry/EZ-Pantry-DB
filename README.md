@@ -12,7 +12,11 @@
   - [Pantry Endpoints](#pantry-endpoints)
     - [Create Pantry 🔒](#create-pantry)
     - [Delete Pantry 🔒](#delete-pantry)
-
+    - [Get All Pantries for a User 🔒](#get-all-pantries-for-a-user)
+    - [Get Pantry 🔒](#get-pantry)
+  - [Product Endpoints](#product-endpoints)
+    - [Add Product to Pantry 🔒](#add-product-to-pantry)
+    - [Remove Product from Pantry 🔒](#remove-product-from-pantry)
 
 ## Quick Start
 
@@ -100,7 +104,6 @@ Register a new user account in the database.
 }
 ```
 
-#### Request Parameters
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `username` | string | Yes | Username (max 30 characters) |
@@ -186,7 +189,6 @@ Login with an email and password to receive a JWT.
 }
 ```
 
-#### Request Parameters
 | Field | Type | Required |
 |-------|------|----------|
 | `username` | string | Yes |
@@ -329,6 +331,10 @@ Create a new pantry
 }
 ```
 
+| Field | Type | Required |
+|-------|------|----------|
+| `name` | string | Yes |
+
 #### Request Header
 ```
 Authorization: Bearer user.token.here
@@ -459,7 +465,7 @@ Authorization: Bearer user.token.here
 **Code** `500 Internal Server Error`
 ```json
 {
-    "error": "Failed to create pantry"
+    "error": "Failed to delete pantry"
 }
 ```
 
@@ -472,4 +478,443 @@ Authorization: Bearer user.token.here
 | `401` | No token |
 | `403` | Bad or expired token |
 | `404` | Pantry ID not found |
+| `500` | Internal server error |
+
+### Get All Pantries for a User
+**GET** `/api/pantry` 🔒
+
+Get all pantries for an authenticated user
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Pantries retrieved successfully",
+    "pantries": [
+        {
+            "pantry_id": 12,
+            "user_id": 1,
+            "name": "New",
+            "is_default": false,
+            "created_at": "2025-10-16T01:04:55.437Z"
+        },
+        {
+            "pantry_id": 6,
+            "user_id": 1,
+            "name": "Testy",
+            "is_default": false,
+            "created_at": "2025-10-13T02:59:57.153Z"
+        }
+    ]
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to retrieve pantries"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Pantries retrieved sucessfully  |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `500` | Internal server error |
+
+### Get Pantry
+**GET** `/api/pantry/:pantryid` 🔒
+
+Get a specific pantry by ID
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Pantry retrieved successfully",
+    "pantry": {
+        "pantry_id": 13,
+        "user_id": 2,
+        "name": "New",
+        "is_default": false,
+        "created_at": "2025-10-16T01:22:09.581Z",
+        "products": [
+            {
+                "product_id": 1,
+                "product_name": "Natural Concord Grape Spread",
+                "brand": "Welch's Concord",
+                "barcode": "0123456789",
+                "image_url": null,
+                "calories_per_100g": null,
+                "quantity": 3,
+                "expiration_date": null
+            }
+        ]
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Pantry not found"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to retrieve pantry"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Pantry retrieved successfully  |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Pantry not found |
+| `500` | Internal server error |
+
+## Product Endpoints
+
+### Add Product to Pantry
+**POST** `/api/pantry/:pantryid/products` 🔒
+
+Add a product to a given pantry
+
+#### Request Body 
+```json
+{
+    "productId" : "1",
+    "quantity": "3",
+    "expirationDate": "10-10-2026"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `productId` | string | Yes | ID of the product to be added |
+| `quantity` | string | Yes | Number of products to add |
+| `expirationDate` | date | No | Expiration date of the product |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `201 Created`
+
+```json
+{
+    "message": "Product added to pantry",
+    "product": {
+        "pantry_id": 13,
+        "product_id": 1,
+        "quantity": 6,
+        "expiration_date": "2026-10-10T05:00:00.000Z"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code** `400 Bad Request`
+```json
+{
+    "error": "Product ID and quantity are required"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Pantry not found"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to create product"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `201` | Product added successfully  |
+| `400` | Invalid input (missing product ID or quantity) |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Pantry not found |
+| `500` | Internal server error |
+
+### Remove Product from Pantry
+**DELETE** `/api/pantry/:pantryid/products/:productid` 🔒
+
+Remove a given product from a given pantry
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "message": "Product removed from pantry",
+    "product": {
+        "pantry_id": 13,
+        "product_id": 1,
+        "quantity": 3,
+        "expiration_date": "2026-10-10T05:00:00.000Z"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Pantry not found"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Product not found in pantry"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to create product"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Product deleted successfully  |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Pantry not found |
+| `404` | Product not found in pantry |
+| `500` | Internal server error |
+
+
+
+
+
+
+
+
+
+
+
+
+### Update Product Quantity
+**PUT** `/api/pantry/:pantryid/products/:productid/quantity` 🔒
+
+Update the quantity of a product in a pantry. quantity <= 0 deletes.
+
+#### Request Body
+```json
+{
+    "quantity" : "3"
+}
+```
+
+| Field | Type | Required |
+|-------|------|----------|
+| `quantity` | number | Yes |
+
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "message": "Product quantity updated",
+    "product": {
+        "pantry_id": 13,
+        "product_id": 1,
+        "quantity": 9,
+        "expiration_date": null
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Quantity is required"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Pantry not found"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Product not found in pantry"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to create product"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Product deleted successfully  |
+| `400` | Quantity not provided |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Pantry not found |
+| `404` | Product not found in pantry |
 | `500` | Internal server error |

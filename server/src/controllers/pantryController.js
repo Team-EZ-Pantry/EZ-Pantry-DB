@@ -20,7 +20,6 @@ async function getAllPantries(req, res) {
   }
 }
 
-
 // Get a specific pantry with all its products
 async function getPantry(req, res) {
   try {
@@ -48,9 +47,6 @@ async function createPantry(req, res) {
   try {
     const { name } = req.body;
     const userId = req.user.userId;
-
-    //console.log('req.user:', req.user);
-    //console.log('userId:', userId);
 
     // Validate input
     if (!name || name.trim() === '') {
@@ -145,6 +141,7 @@ async function addProductToPantry(req, res) {
       return res.status(404).json({ error: 'Pantry not found' });
     }
 
+    // MODEL CALL
     const result = await pantryModel.addProductToPantry(
       pantryId,
       productId,
@@ -209,6 +206,10 @@ async function updateProductQuantity(req, res) {
     }
 
     const result = await pantryModel.updateProductQuantity(pantryId, productId, quantity);
+
+    if (!result) {
+      return res.status(404).json({ error: 'Product not found in pantry' });
+    }
 
     res.json({
       message: 'Product quantity updated',
