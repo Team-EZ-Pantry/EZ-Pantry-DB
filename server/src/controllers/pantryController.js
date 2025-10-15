@@ -49,8 +49,8 @@ async function createPantry(req, res) {
     const { name } = req.body;
     const userId = req.user.userId;
 
-    console.log('req.user:', req.user);
-    console.log('userId:', userId);
+    //console.log('req.user:', req.user);
+    //console.log('userId:', userId);
 
     // Validate input
     if (!name || name.trim() === '') {
