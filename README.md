@@ -17,6 +17,8 @@
   - [Product Endpoints](#product-endpoints)
     - [Add Product to Pantry 🔒](#add-product-to-pantry)
     - [Remove Product from Pantry 🔒](#remove-product-from-pantry)
+    - [Update Product Quantity 🔒](#update-product-quantity)
+    - [Update Product Expiration Date 🔒](#update-product-expiration-date)
 
 ## Quick Start
 
@@ -796,7 +798,7 @@ Authorization: Bearer user.token.here
 **Code** `500 Internal Server Error`
 ```json
 {
-    "error": "Failed to create product"
+    "error": "Failed to remove product from pantry"
 }
 ```
 
@@ -811,17 +813,6 @@ Authorization: Bearer user.token.here
 | `404` | Pantry not found |
 | `404` | Product not found in pantry |
 | `500` | Internal server error |
-
-
-
-
-
-
-
-
-
-
-
 
 ### Update Product Quantity
 **PUT** `/api/pantry/:pantryid/products/:productid/quantity` 🔒
@@ -902,7 +893,7 @@ Authorization: Bearer user.token.here
 **Code** `500 Internal Server Error`
 ```json
 {
-    "error": "Failed to create product"
+    "error": "Failed to update product quantity"
 }
 ```
 
@@ -911,8 +902,104 @@ Authorization: Bearer user.token.here
 #### Status Codes
 | Code | Description |
 |------|-------------|
-| `200` | Product deleted successfully  |
+| `200` | Product quantity updated  |
 | `400` | Quantity not provided |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Pantry not found |
+| `404` | Product not found in pantry |
+| `500` | Internal server error |
+
+### Update Product Expiration Date
+**PUT** `/api/pantry/:pantryid/products/:productid/expiration` 🔒
+
+Update the expiration date of a product in a pantry
+
+#### Request Body
+```json
+{
+    "expirationDate" : "11-11-2067"
+}
+```
+
+| Field | Type | Required |
+|-------|------|----------|
+| `expirationDate` | date | Yes |
+
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "message": "Product expiration date updated",
+    "product": {
+        "pantry_id": 13,
+        "product_id": 1,
+        "quantity": 9,
+        "expiration_date": "2067-11-11T06:00:00.000Z"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Expiration date is required"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Pantry not found"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Product not found in pantry"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to update product quantity"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Expiration date updated sucessfully  |
+| `400` | Expiration date not provided |
 | `401` | No token |
 | `403` | Bad or expired token |
 | `404` | Pantry not found |

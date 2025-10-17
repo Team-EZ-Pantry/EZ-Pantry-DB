@@ -241,6 +241,10 @@ async function updateProductExpiration(req, res) {
 
     const result = await pantryModel.updateProductExpiration(pantryId, productId, expirationDate);
 
+    if (!result) {
+      return res.status(404).json({ error: 'Product not found in pantry' });
+    }
+
     res.json({
       message: 'Product expiration date updated',
       product: result
