@@ -1,8 +1,5 @@
 const pool = require('../config/database');
 
-// Super comment
-
-
 // *************************************
 // *    Pantry Management Functions    *
 // *************************************
@@ -120,6 +117,9 @@ async function removeProductFromPantry(pantryId, productId) {
   );
   return result.rows[0];
 }
+
+/* Potential change: Products won't be removed when quantity goes to zero */
+/* =======================================================================*/
 
 // Update product quantity in pantry
 async function updateProductQuantity(pantryId, productId, quantity) {
