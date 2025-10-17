@@ -1,6 +1,7 @@
 # EZ Pantry Database and Backend API
 
 ## Table of Contents
+- [EZ Pantry Features](#ez-pantry-features)
 - [Quick Start](#-quick-start)
   - [Authentication](#authentication-🔒)
 - [API Docs](#api-docs)
@@ -19,6 +20,21 @@
     - [Remove Product from Pantry 🔒](#remove-product-from-pantry)
     - [Update Product Quantity 🔒](#update-product-quantity)
     - [Update Product Expiration Date 🔒](#update-product-expiration-date)
+
+## EZ Pantry Features
+
+✅ Login \
+✅ Register \
+✅ Create, delete, modify pantries \
+✅ Add and remove products, modify quantity and expiration \
+*Product search with autocomplete*
+*Custom products associated with a user* \
+*Create and save shopping lists, autoadd them to pantries* \
+*Barcode scanning* \
+*User product submission to the product database (?)* \
+*Pantry/shopping list sharing between users* \
+*LLM recipe generation + custom recipes + saving recipes*
+
 
 ## Quick Start
 
