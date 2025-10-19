@@ -118,16 +118,8 @@ async function removeProductFromPantry(pantryId, productId) {
   return result.rows[0];
 }
 
-/* Potential change: Products won't be removed when quantity goes to zero */
-/* =======================================================================*/
-
-// Update product quantity in pantry
+// Update product quantity in pantry (Products won't be removed when quantity goes to zero)
 async function updateProductQuantity(pantryId, productId, quantity) {
-  if (quantity <= 0) {
-    // Delete if quantity is 0 or less
-    return await removeProductFromPantry(pantryId, productId);
-  }
-
   const result = await pool.query(
     'UPDATE pantry_product SET quantity = $1 WHERE pantry_id = $2 AND product_id = $3 RETURNING *',
     [quantity, pantryId, productId]
