@@ -13,7 +13,7 @@ const pool = require('../config/database');
 // *************************************
 async function checkEmailExists(email) {
     const result = await pool.query(
-      'SELECT user_id FROM app_user WHERE email = $1',
+      'SELECT user_id FROM app_user WHERE LOWER(email) = LOWER($1)',
       [email]
     );
     return result.rows.length > 0;
@@ -36,7 +36,7 @@ return result.rows.length > 0;
 async function createUser(username, email, passwordHash) {
   const result = await pool.query(
     `INSERT INTO app_user (username, email, password_hash) 
-     VALUES ($1, $2, $3) 
+     VALUES ($1, LOWER($2), $3) 
      RETURNING user_id, username, email, created_at`,
     [username, email, passwordHash]
   );
@@ -60,7 +60,7 @@ async function findUserById(userId) {
 // *************************************
 async function findUserByEmail(email) {
   const result = await pool.query(
-    'SELECT user_id, username, email, password_hash, created_at FROM app_user WHERE email = $1',
+    'SELECT user_id, username, email, password_hash, created_at FROM app_user WHERE LOWER(email) = LOWER($1)',
     [email]
   );
   return result.rows[0]; // Returns undefined if not found

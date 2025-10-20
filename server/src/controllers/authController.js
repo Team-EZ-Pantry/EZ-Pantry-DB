@@ -15,6 +15,9 @@ async function register(req, res) {
   try {
     const { username, email, password } = req.body;
 
+    // Normalize email to lowercase
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Validate input
     if (!username || !email || !password) {
       return res.status(400).json({ 
@@ -52,8 +55,8 @@ async function register(req, res) {
       });
     }
 
-    // Check if user already exists (MODEL CALL)
-    const exists = await userModel.checkEmailExists(email);
+    // Check if user already exists
+    const exists = await userModel.checkEmailExists(normalizedEmail);
     if (exists) {
       return res.status(409).json({ 
         error: 'A user with this email address already exists' 
@@ -63,8 +66,8 @@ async function register(req, res) {
     // Hash the password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user in database (MODEL CALL)
-    const newUser = await userModel.createUser(username, email, passwordHash);
+    // Create user in database
+    const newUser = await userModel.createUser(username, normalizedEmail, passwordHash);
 
     // Send response
     res.status(201).json({
@@ -97,6 +100,9 @@ async function login(req, res) {
  try {
    const { email, password } = req.body;
 
+   // Normalize email to lowercase
+   const normalizedEmail = email.trim().toLowerCase();
+
    // Validate input
    if (!email || !password) {
      return res.status(400).json({ 
@@ -104,12 +110,8 @@ async function login(req, res) {
      });
    }
 
-   // Find user by email (MODEL CALL)
-   const user = await userModel.findUserByEmail(email);
-   
-   // If user doesn't exist, return error
-   // We say "Invalid email or password", not "email doesn't exist"
-   // This prevents attackers from knowing which emails are registered
+   // Find user by email if it exists
+   const user = await userModel.findUserByEmail(normalizedEmail);
    if (!user) {
      return res.status(401).json({ 
        error: 'Invalid email or password' 
