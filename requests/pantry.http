@@ -1,6 +1,6 @@
 ### Create Pantry
 POST http://localhost:3000/api/pantry/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjEwMTk3NzIsImV4cCI6MTc2MzYxMTc3Mn0.6u-o15-UR7BYFNY2X8TF0vxQFigX-cVZyCgNtHOTQo4
+Authorization: Bearer 
 Content-Type: application/json
 
 {
@@ -9,9 +9,8 @@ Content-Type: application/json
 
 ### Get all pantries for a user
 GET http://localhost:3000/api/pantry/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjEwMTk3NzIsImV4cCI6MTc2MzYxMTc3Mn0.6u-o15-UR7BYFNY2X8TF0vxQFigX-cVZyCgNtHOTQo4
+Authorization: Bearer 
 
 ### Get pantry
 GET http://localhost:3000/api/pantry/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjEwMTk3NzIsImV4cCI6MTc2MzYxMTc3Mn0.6u-o15-UR7BYFNY2X8TF0vxQFigX-cVZyCgNtHOTQo4
-
+Authorization: Bearer 
