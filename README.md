@@ -1160,7 +1160,7 @@ Authorization: Bearer user.token.here
 
 ---
 
-#### Get Product by ID
+### Get Product by ID
 **GET** `/api/products/:productId`
 
 Retrieve product details by product ID.
