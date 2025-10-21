@@ -33,15 +33,16 @@ app.get('/health', async (req, res) => {
 // *           API Routes              *
 // *************************************
 const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
-
 const pantryRoutes = require('./routes/pantry');
+const productRoutes = require('./routes/products');
+
+app.use('/api/auth', authRoutes);
 app.use('/api/pantry', pantryRoutes);
+app.use('/api/products', productRoutes);
 
-
-
-
-// Start the server
+// *************************************
+// *         Start the Server         *
+// *************************************
 async function startServer() {
   try {
     // Test database connection before starting server

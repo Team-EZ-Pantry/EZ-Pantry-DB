@@ -1,8 +1,8 @@
-const pool = require('../config/database');
-
 // *************************************
 // *    Pantry Management Functions    *
 // *************************************
+
+const pool = require('../config/database');
 
 // Get all pantries for a specific user
 async function getPantriesByUserId(userId) {

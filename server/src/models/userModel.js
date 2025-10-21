@@ -1,12 +1,8 @@
-const pool = require('../config/database');
-
 // *************************************
 // *      User-related functions       *
 // *************************************
-// checkEmailExists(email) 
-// checkUsernameExists(username)
-// createUser(username, email, passwordHash)
-// findUserByEmail(email)
+
+const pool = require('../config/database');
 
 // *************************************
 // *    Check if user email exists     *
