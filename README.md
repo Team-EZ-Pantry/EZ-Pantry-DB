@@ -3,27 +3,27 @@
 ## Table of Contents
 - [EZ Pantry Features](#ez-pantry-features)
 - [Quick Start](#-quick-start)
-  - [Authentication 🔒](#authentication-🔒)
+  - [Authentication 🔒](#authentication)
 - [API Docs](#api-docs)
   - [Health Check](#health-check)
   - [Authentication Endpoints](#authentication-endpoints)
     - [Register](#register)
     - [Login](#login)
-    - [Me 🔒](#me-🔒)
+    - [Me 🔒](#me)
   - [Pantry Endpoints](#pantry-endpoints)
-    - [Create Pantry 🔒](#create-pantry-🔒)
-    - [Delete Pantry 🔒](#delete-pantry-🔒)
-    - [Get All Pantries for a User 🔒](#get-all-pantries-for-a-user-🔒)
-    - [Get Pantry 🔒](#get-pantry-🔒)
+    - [Create Pantry 🔒](#create-pantry)
+    - [Delete Pantry 🔒](#delete-pantry)
+    - [Get All Pantries for a User 🔒](#get-all-pantries-for-a-user)
+    - [Get Pantry 🔒](#get-pantry)
   - [Pantry Product Endpoints](#pantry-product-endpoints)
-    - [Add Product to Pantry 🔒](#add-product-to-pantry-🔒)
-    - [Remove Product from Pantry 🔒](#remove-product-from-pantry-🔒)
-    - [Update Product Quantity 🔒](#update-product-quantity-🔒)
-    - [Update Product Expiration Date 🔒](#update-product-expiration-date-🔒)
+    - [Add Product to Pantry 🔒](#add-product-to-pantry)
+    - [Remove Product from Pantry 🔒](#remove-product-from-pantry)
+    - [Update Product Quantity 🔒](#update-product-quantity)
+    - [Update Product Expiration Date 🔒](#update-product-expiration-date)
   - [Product Endpoints](#product-endpoints)
-    - [Search Products 🔒](#search-products-🔒)
-    - [Get Product by Barcode 🔒](#get-product-by-barcode-🔒)
-    - [Get Product by ID 🔒](#get-product-by-id-🔒)
+    - [Search Products 🔒](#search-products)
+    - [Get Product by Barcode 🔒](#get-product-by-barcode)
+    - [Get Product by ID 🔒](#get-product-by-id)
 
 ## EZ Pantry Features
 
@@ -31,7 +31,7 @@
 ✅ Register \
 ✅ Create, delete, modify pantries \
 ✅ Add and remove products, modify quantity and expiration \
-*Product search with autocomplete*
+✅ Product search with autocomplete \
 *Custom products associated with a user* \
 *Create and save shopping lists, autoadd them to pantries* \
 *Barcode scanning* \
@@ -267,7 +267,7 @@ Login with an email and password to receive a JWT.
 | `401` | Unauthorized |
 | `500` | Internal server error |
 
-### Me 🔒
+### Me
 **GET** `/api/auth/me`
 
 Protected route - Get the current user's information.
@@ -341,7 +341,7 @@ Authorization: Bearer user.token.here
 
 ## Pantry Endpoints
 
-### Create Pantry 🔒
+### Create Pantry
 **POST** `/api/pantry/`
 
 Create a new pantry
@@ -422,7 +422,7 @@ Authorization: Bearer user.token.here
 | `403` | Bad or expired token |
 | `500` | Internal server error |
 
-### Delete Pantry 🔒
+### Delete Pantry
 **DELETE** `/api/pantry/:pantryid`
 
 Delete a pantry by ID
@@ -502,7 +502,7 @@ Authorization: Bearer user.token.here
 | `404` | Pantry ID not found |
 | `500` | Internal server error |
 
-### Get All Pantries for a User 🔒
+### Get All Pantries for a User
 **GET** `/api/pantry`
 
 Get all pantries for an authenticated user
@@ -576,7 +576,7 @@ Authorization: Bearer user.token.here
 | `403` | Bad or expired token |
 | `500` | Internal server error |
 
-### Get Pantry 🔒
+### Get Pantry
 **GET** `/api/pantry/:pantryid`
 
 Get a specific pantry by ID
@@ -663,7 +663,7 @@ Authorization: Bearer user.token.here
 
 ## Pantry Product Endpoints
 
-### Add Product to Pantry 🔒
+### Add Product to Pantry
 **POST** `/api/pantry/:pantryid/products`
 
 Add a product to a given pantry
@@ -755,7 +755,7 @@ Authorization: Bearer user.token.here
 | `404` | Pantry not found |
 | `500` | Internal server error |
 
-### Remove Product from Pantry 🔒
+### Remove Product from Pantry
 **DELETE** `/api/pantry/:pantryid/products/:productid`
 
 Remove a given product from a given pantry
@@ -834,7 +834,7 @@ Authorization: Bearer user.token.here
 | `404` | Product not found in pantry |
 | `500` | Internal server error |
 
-### Update Product Quantity 🔒
+### Update Product Quantity
 **PUT** `/api/pantry/:pantryid/products/:productid/quantity`
 
 Update the quantity of a product in a pantry. quantity <= 0 deletes.
@@ -930,7 +930,7 @@ Authorization: Bearer user.token.here
 | `404` | Product not found in pantry |
 | `500` | Internal server error |
 
-### Update Product Expiration Date 🔒
+### Update Product Expiration Date
 **PUT** `/api/pantry/:pantryid/products/:productid/expiration`
 
 Update the expiration date of a product in a pantry
@@ -1028,7 +1028,7 @@ Authorization: Bearer user.token.here
 
 ## Product Endpoints
 
-### Search Products 🔒
+### Search Products
 **GET** `/api/products/search?q=milk&limit=10`
 
 Search for products by name with partial search (autocomplete) functionality.
@@ -1100,7 +1100,7 @@ Authorization: Bearer user.token.here
 
 ---
 
-### Get Product by Barcode 🔒
+### Get Product by Barcode
 **GET** `/api/products/barcode/:barcode`
 
 Retrieve product details by barcode.
@@ -1160,7 +1160,7 @@ Authorization: Bearer user.token.here
 
 ---
 
-#### Get Product by ID 🔒
+#### Get Product by ID
 **GET** `/api/products/:productId`
 
 Retrieve product details by product ID.
