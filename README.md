@@ -1066,7 +1066,7 @@ Authorization: Bearer user.token.here
             "barcode": "987654321",
             "image_url": null,
             "calories_per_100g": 30
-        
+        }
     ]
 }
 ```
