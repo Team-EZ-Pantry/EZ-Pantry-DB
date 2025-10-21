@@ -19,4 +19,4 @@ Content-Type: application/json
 
 ### Get Me
 GET http://localhost:3000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjEwMTk3NzIsImV4cCI6MTc2MzYxMTc3Mn0.6u-o15-UR7BYFNY2X8TF0vxQFigX-cVZyCgNtHOTQo4
+Authorization: Bearer 
