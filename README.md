@@ -837,7 +837,7 @@ Authorization: Bearer user.token.here
 ### Update Product Quantity
 **PUT** `/api/pantry/:pantryid/products/:productid/quantity`
 
-Update the quantity of a product in a pantry. quantity <= 0 deletes.
+Update the quantity of a product in a pantry. Quantity = 0 will NOT delete.
 
 #### Request Body
 ```json
