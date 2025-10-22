@@ -77,7 +77,7 @@ inside EZ-Pantry-DB/server/src, run ```node index.js```. (Press ctrl + C to stop
 ```
 http://localhost:3000
 ```
-## Authentication 🔒
+## Authentication
 USE THE HEADER: Authorization: Bearer {token} \
 Example:
 ```
