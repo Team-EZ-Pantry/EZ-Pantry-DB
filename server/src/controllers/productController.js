@@ -46,25 +46,6 @@ async function searchProducts(req, res) {
   }
 }
 
-// Get product details by ID
-async function getProductById(req, res) {
-  try {
-    const { productId } = req.params;
-
-    const product = await productModel.findById(productId);
-
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-
-    res.json({ product });
-
-  } catch (error) {
-    console.error('Get product error:', error);
-    res.status(500).json({ error: 'Failed to fetch product' });
-  }
-}
-
 // Get product by barcode (for scanning)
 async function getProductByBarcode(req, res) {
     try {
@@ -86,6 +67,25 @@ async function getProductByBarcode(req, res) {
       res.status(500).json({ error: 'Failed to fetch product' });
     }
   }
+
+// Get product details by ID
+async function getProductById(req, res) {
+  try {
+    const { productId } = req.params;
+
+    const product = await productModel.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.json({ product });
+
+  } catch (error) {
+    console.error('Get product error:', error);
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+}
 
 module.exports = {
   searchProducts,
