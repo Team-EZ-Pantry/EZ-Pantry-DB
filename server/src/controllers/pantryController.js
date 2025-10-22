@@ -4,45 +4,9 @@
 
 const pantryModel = require('../models/pantryModel');
 
-// Get all pantries for the authenticated user
-async function getAllPantries(req, res) {
-  try {
-    const userId = req.user.userId; // From authenticated token
-    const pantries = await pantryModel.getPantriesByUserId(userId);
-    
-    res.json({
-      message: 'Pantries retrieved successfully',
-      pantries
-    });
-  } catch (error) {
-    console.error('Get pantries error:', error);
-    res.status(500).json({ error: 'Failed to retrieve pantries' });
-  }
-}
-
-// Get a specific pantry with all its products
-async function getPantry(req, res) {
-  try {
-    const { pantryId } = req.params;
-    const userId = req.user.userId;
-
-    const pantryWithProducts = await pantryModel.getPantryWithProducts(pantryId, userId);
-    
-    if (!pantryWithProducts) {
-      return res.status(404).json({ error: 'Pantry not found' });
-    }
-
-    res.json({
-      message: 'Pantry retrieved successfully',
-      pantry: pantryWithProducts
-    });
-  } catch (error) {
-    console.error('Get pantry error:', error);
-    res.status(500).json({ error: 'Failed to retrieve pantry' });
-  }
-}
-
-// Create a new pantry
+// *************************************
+// *       Create a New Pantry         *
+// *************************************
 async function createPantry(req, res) {
   try {
     const { name } = req.body;
@@ -65,7 +29,33 @@ async function createPantry(req, res) {
   }
 }
 
-// Update pantry name
+// *************************************
+// *         Delete a Pantry           *
+// *************************************
+async function deletePantry(req, res) {
+  try {
+    const { pantryId } = req.params;
+    const userId = req.user.userId;
+
+    const deletedPantry = await pantryModel.deletePantry(pantryId, userId);
+
+    if (!deletedPantry) {
+      return res.status(404).json({ error: 'Pantry not found' });
+    }
+
+    res.json({
+      message: 'Pantry deleted successfully',
+      pantry: deletedPantry
+    });
+  } catch (error) {
+    console.error('Delete pantry error:', error);
+    res.status(500).json({ error: 'Failed to delete pantry' });
+  }
+}
+
+// *************************************
+// *       Update Pantry Name          *
+// *************************************
 async function updatePantry(req, res) {
   try {
     const { pantryId } = req.params;
@@ -93,25 +83,45 @@ async function updatePantry(req, res) {
   }
 }
 
-// Delete a pantry
-async function deletePantry(req, res) {
+// *************************************
+// *    Get all Pantries for a User    *
+// *************************************
+async function getAllPantries(req, res) {
+  try {
+    const userId = req.user.userId; // From authenticated token
+    const pantries = await pantryModel.getPantriesByUserId(userId);
+    
+    res.json({
+      message: 'Pantries retrieved successfully',
+      pantries
+    });
+  } catch (error) {
+    console.error('Get pantries error:', error);
+    res.status(500).json({ error: 'Failed to retrieve pantries' });
+  }
+}
+
+// *************************************
+// *   Get a Pantry and its Products   *
+// *************************************
+async function getPantry(req, res) {
   try {
     const { pantryId } = req.params;
     const userId = req.user.userId;
 
-    const deletedPantry = await pantryModel.deletePantry(pantryId, userId);
-
-    if (!deletedPantry) {
+    const pantryWithProducts = await pantryModel.getPantryWithProducts(pantryId, userId);
+    
+    if (!pantryWithProducts) {
       return res.status(404).json({ error: 'Pantry not found' });
     }
 
     res.json({
-      message: 'Pantry deleted successfully',
-      pantry: deletedPantry
+      message: 'Pantry retrieved successfully',
+      pantry: pantryWithProducts
     });
   } catch (error) {
-    console.error('Delete pantry error:', error);
-    res.status(500).json({ error: 'Failed to delete pantry' });
+    console.error('Get pantry error:', error);
+    res.status(500).json({ error: 'Failed to retrieve pantry' });
   }
 }
 
@@ -119,7 +129,9 @@ async function deletePantry(req, res) {
 // *  Product Management Controllers   *
 // *************************************
 
-// Add a product to a pantry
+// *************************************
+// *     Add a Product to a Pantry     *
+// *************************************
 async function addProductToPantry(req, res) {
   try {
     const { pantryId } = req.params;
@@ -159,7 +171,9 @@ async function addProductToPantry(req, res) {
   }
 }
 
-// Remove a product from pantry
+// *************************************
+// *   Remove a Product from Pantry    *
+// *************************************
 async function removeProductFromPantry(req, res) {
   try {
     const { pantryId, productId } = req.params;
@@ -173,10 +187,6 @@ async function removeProductFromPantry(req, res) {
 
     const result = await pantryModel.removeProductFromPantry(pantryId, productId);
 
-    if (!result) {
-      return res.status(404).json({ error: 'Product not found in pantry' });
-    }
-
     res.json({
       message: 'Product removed from pantry',
       product: result
@@ -187,7 +197,9 @@ async function removeProductFromPantry(req, res) {
   }
 }
 
-// Update product quantity in pantry
+// *************************************
+// * Update a Pantry Product Quantity  *
+// *************************************
 async function updateProductQuantity(req, res) {
   try {
     const { pantryId, productId } = req.params;
@@ -221,7 +233,9 @@ async function updateProductQuantity(req, res) {
   }
 }
 
-// Update product expiration date
+// *************************************
+// * Update Pantry Product Expiration  *
+// *************************************
 async function updateProductExpiration(req, res) {
   try {
     const { pantryId, productId } = req.params;

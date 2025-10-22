@@ -3,7 +3,7 @@
 ## Table of Contents
 - [EZ Pantry Features](#ez-pantry-features)
 - [Quick Start](#-quick-start)
-  - [Authentication](#authentication-🔒)
+  - [Authentication 🔒](#authentication)
 - [API Docs](#api-docs)
   - [Health Check](#health-check)
   - [Authentication Endpoints](#authentication-endpoints)
@@ -15,11 +15,15 @@
     - [Delete Pantry 🔒](#delete-pantry)
     - [Get All Pantries for a User 🔒](#get-all-pantries-for-a-user)
     - [Get Pantry 🔒](#get-pantry)
-  - [Product Endpoints](#product-endpoints)
+  - [Pantry Product Endpoints](#pantry-product-endpoints)
     - [Add Product to Pantry 🔒](#add-product-to-pantry)
     - [Remove Product from Pantry 🔒](#remove-product-from-pantry)
     - [Update Product Quantity 🔒](#update-product-quantity)
     - [Update Product Expiration Date 🔒](#update-product-expiration-date)
+  - [Product Endpoints](#product-endpoints)
+    - [Search Products 🔒](#search-products)
+    - [Get Product by Barcode 🔒](#get-product-by-barcode)
+    - [Get Product by ID 🔒](#get-product-by-id)
 
 ## EZ Pantry Features
 
@@ -27,7 +31,7 @@
 ✅ Register \
 ✅ Create, delete, modify pantries \
 ✅ Add and remove products, modify quantity and expiration \
-*Product search with autocomplete*
+✅ Product search with autocomplete \
 *Custom products associated with a user* \
 *Create and save shopping lists, autoadd them to pantries* \
 *Barcode scanning* \
@@ -73,7 +77,7 @@ inside EZ-Pantry-DB/server/src, run ```node index.js```. (Press ctrl + C to stop
 ```
 http://localhost:3000
 ```
-## Authentication 🔒
+## Authentication
 USE THE HEADER: Authorization: Bearer {token} \
 Example:
 ```
@@ -264,7 +268,7 @@ Login with an email and password to receive a JWT.
 | `500` | Internal server error |
 
 ### Me
-**GET** `/api/auth/me` 🔒
+**GET** `/api/auth/me`
 
 Protected route - Get the current user's information.
 
@@ -338,7 +342,7 @@ Authorization: Bearer user.token.here
 ## Pantry Endpoints
 
 ### Create Pantry
-**POST** `/api/pantry/` 🔒
+**POST** `/api/pantry/`
 
 Create a new pantry
 
@@ -419,7 +423,7 @@ Authorization: Bearer user.token.here
 | `500` | Internal server error |
 
 ### Delete Pantry
-**DELETE** `/api/pantry/:pantryid` 🔒
+**DELETE** `/api/pantry/:pantryid`
 
 Delete a pantry by ID
 
@@ -499,7 +503,7 @@ Authorization: Bearer user.token.here
 | `500` | Internal server error |
 
 ### Get All Pantries for a User
-**GET** `/api/pantry` 🔒
+**GET** `/api/pantry`
 
 Get all pantries for an authenticated user
 
@@ -573,7 +577,7 @@ Authorization: Bearer user.token.here
 | `500` | Internal server error |
 
 ### Get Pantry
-**GET** `/api/pantry/:pantryid` 🔒
+**GET** `/api/pantry/:pantryid`
 
 Get a specific pantry by ID
 
@@ -657,10 +661,10 @@ Authorization: Bearer user.token.here
 | `404` | Pantry not found |
 | `500` | Internal server error |
 
-## Product Endpoints
+## Pantry Product Endpoints
 
 ### Add Product to Pantry
-**POST** `/api/pantry/:pantryid/products` 🔒
+**POST** `/api/pantry/:pantryid/products`
 
 Add a product to a given pantry
 
@@ -752,7 +756,7 @@ Authorization: Bearer user.token.here
 | `500` | Internal server error |
 
 ### Remove Product from Pantry
-**DELETE** `/api/pantry/:pantryid/products/:productid` 🔒
+**DELETE** `/api/pantry/:pantryid/products/:productid`
 
 Remove a given product from a given pantry
 
@@ -831,7 +835,7 @@ Authorization: Bearer user.token.here
 | `500` | Internal server error |
 
 ### Update Product Quantity
-**PUT** `/api/pantry/:pantryid/products/:productid/quantity` 🔒
+**PUT** `/api/pantry/:pantryid/products/:productid/quantity`
 
 Update the quantity of a product in a pantry. quantity <= 0 deletes.
 
@@ -927,7 +931,7 @@ Authorization: Bearer user.token.here
 | `500` | Internal server error |
 
 ### Update Product Expiration Date
-**PUT** `/api/pantry/:pantryid/products/:productid/expiration` 🔒
+**PUT** `/api/pantry/:pantryid/products/:productid/expiration`
 
 Update the expiration date of a product in a pantry
 
@@ -1020,4 +1024,195 @@ Authorization: Bearer user.token.here
 | `403` | Bad or expired token |
 | `404` | Pantry not found |
 | `404` | Product not found in pantry |
+| `500` | Internal server error |
+
+## Product Endpoints
+
+### Search Products
+**GET** `/api/products/search?q=milk&limit=10`
+
+Search for products by name with partial search (autocomplete) functionality.
+
+#### Query Parameters
+| Parameter | Type   | Required |Description                          |
+|-----------|--------|----------|--------------------------------------|
+| `q`       | string | Yes      | Search query (minimum 2 characters) |
+| `limit`   | number | No       | Maximum number of results (default: 10) |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "query": "milk",
+    "count": 2,
+    "products": [
+        {
+            "product_id": 1,
+            "product_name": "Milk",
+            "brand": "Brand A",
+            "barcode": "123456789",
+            "image_url": null,
+            "calories_per_100g": 42
+        },
+        {
+            "product_id": 2,
+            "product_name": "Almond Milk",
+            "brand": "Brand B",
+            "barcode": "987654321",
+            "image_url": null,
+            "calories_per_100g": 30
+        }
+    ]
+}
+```
+
+#### Error Responses
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Search query is required"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to search products"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Products retrieved successfully |
+| `400` | Missing or invalid query parameter |
+| `500` | Internal server error |
+
+---
+
+### Get Product by Barcode
+**GET** `/api/products/barcode/:barcode`
+
+Retrieve product details by barcode.
+
+#### Request Parameters
+| Parameter | Type   | Required | Description          |
+|-----------|--------|----------|----------------------|
+| `barcode` | string | Yes      | Barcode of the product |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "product": {
+        "product_id": 1,
+        "product_name": "Milk",
+        "brand": "Brand A",
+        "barcode": "123456789",
+        "image_url": null,
+        "calories_per_100g": 42
+    }
+}
+```
+
+#### Error Responses
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Product not found",
+    "barcode": "123456789"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to fetch product"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Product retrieved successfully |
+| `404` | Product not found |
+| `500` | Internal server error |
+
+---
+
+### Get Product by ID
+**GET** `/api/products/:productId`
+
+Retrieve product details by product ID.
+
+#### Request Parameters
+| Parameter   | Type   | Required | Description          |
+|-------------|--------|----------|----------------------|
+| `productId` | string | Yes      | ID of the product |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "product": {
+        "product_id": 1,
+        "product_name": "Milk",
+        "brand": "Brand A",
+        "barcode": "123456789",
+        "image_url": null,
+        "calories_per_100g": 42
+    }
+}
+```
+
+#### Error Responses
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Product not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to fetch product"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Product retrieved successfully |
+| `404` | Product not found |
 | `500` | Internal server error |
