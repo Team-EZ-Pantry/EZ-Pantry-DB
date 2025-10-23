@@ -48,17 +48,43 @@ async function deleteShoppingList(userId, listId) {
 }
 
 // Toggle the checked status of an item on a list
-async function toggleItemChecked(listId, itemId) { // need to implement list complete checking !!
-   const result = await pool.query(
-      `UPDATE shopping_list_item
-       SET checked = NOT COALESCE(checked, FALSE)
-       WHERE item_id = $1 AND list_id = $2
-       RETURNING *`,
-      [itemId, listId, userId]
-   );
-   
-   return result.rows[0];
+async function toggleItemChecked(listId, itemId) {
+  // 1. Toggle the checked status
+  const updatedItemResult = await pool.query(
+    `UPDATE shopping_list_item
+     SET checked = NOT COALESCE(checked, FALSE)
+     WHERE item_id = $1 AND list_id = $2
+     RETURNING *`,
+    [itemId, listId]
+  );
+
+  const updatedItem = updatedItemResult.rows[0];
+  if (!updatedItem) return null;
+
+  // 2. Check whether all items in the list are now checked
+  const completionCheck = await pool.query(
+    `SELECT
+       BOOL_AND(checked) AS all_checked
+     FROM shopping_list_item
+     WHERE list_id = $1`,
+    [listId]
+  );
+
+  const allChecked = completionCheck.rows[0].all_checked || false;
+
+  // 3. Update shopping_list.is_complete based on that result
+  await pool.query(
+    `UPDATE shopping_list
+     SET is_complete = $1,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE list_id = $2`,
+    [allChecked, listId]
+  );
+
+  // 4. Return the updated item
+  return updatedItem;
 }
+
 
 // Add an item to a shopping list
 async function addShoppingListItem(listId, productId, quantity) {
