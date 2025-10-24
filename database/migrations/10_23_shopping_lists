@@ -13,7 +13,7 @@ CREATE TABLE shopping_list (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_complete BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (userId) REFERENCES users(userId)
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id)
 );
 
 CREATE TABLE shopping_list_item (
@@ -24,6 +24,6 @@ CREATE TABLE shopping_list_item (
     checked BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (list_id) REFERENCES shopping_list(list_id),
+    FOREIGN KEY (list_id) REFERENCES shopping_list(list_id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES product(product_id)
 );

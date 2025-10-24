@@ -23,23 +23,16 @@ async function createShoppingList(userId, name) {
 }
 
 // Get a specific shopping list for a user
-async function getShoppingList(userId, listId) {
+async function getShoppingList(listId) {
   const result = await pool.query(
-    'SELECT * FROM shopping_list WHERE list_id = $1 AND user_id = $2',
-    [listId, userId]
+    'SELECT shopping_list_item.*, product.product_name FROM shopping_list_item JOIN product ON shopping_list_item.product_id = product.product_id WHERE shopping_list_item.list_id = $1',
+    [listId]
   );
   return result.rows[0];
 }
 
 // Delete a shopping list and its associated items for a user
 async function deleteShoppingList(userId, listId) {
-  // First delete associated items
-   await pool.query(
-    'DELETE FROM shopping_list_item WHERE list_id = $1 AND user_id = $2',
-    [listId, userId]
-  );
-
-  // Then delete the shopping list itself
   const result = await pool.query(
     'DELETE FROM shopping_list WHERE list_id = $1 AND user_id = $2 RETURNING *',
     [listId, userId]

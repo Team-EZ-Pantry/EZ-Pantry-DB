@@ -40,7 +40,7 @@ async function getShoppingList(req, res) {
   try {
     const userId = req.user.userId;
     const { listId } = req.params;
-    const shoppingList = await shoppingListModel.getShoppingList(userId, listId);
+    const shoppingList = await shoppingListModel.getShoppingList(listId);
     if (!shoppingList) {
       return res.status(404).json({ error: 'Shopping list not found' });
     }
