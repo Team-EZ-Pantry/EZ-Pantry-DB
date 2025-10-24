@@ -28,7 +28,7 @@ async function getShoppingList(listId) {
     'SELECT shopping_list_item.*, product.product_name FROM shopping_list_item JOIN product ON shopping_list_item.product_id = product.product_id WHERE shopping_list_item.list_id = $1',
     [listId]
   );
-  return result.rows[0];
+  return result.rows;
 }
 
 // Delete a shopping list and its associated items for a user
