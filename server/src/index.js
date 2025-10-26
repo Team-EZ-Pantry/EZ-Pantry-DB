@@ -35,7 +35,9 @@ app.get('/health', async (req, res) => {
 const authRoutes = require('./routes/auth');
 const pantryRoutes = require('./routes/pantry');
 const productRoutes = require('./routes/products');
+const shoppingListRoutes = require('./routes/shoppingList');
 
+app.use('/api/shopping-lists', shoppingListRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/pantry', pantryRoutes);
 app.use('/api/products', productRoutes);
