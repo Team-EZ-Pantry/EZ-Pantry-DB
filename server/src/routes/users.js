@@ -12,8 +12,4 @@ router.put('/profile', authenticateToken, usersController.updateUserProfile);
 router.put('/password', authenticateToken, usersController.changeUserPassword);
 router.delete('/account', authenticateToken, usersController.deleteUserProfile); 
 
-// User-specific pantry retrieval
-//router.get('/:userId/pantries', authenticateToken, usersController.getUserPantries);    
-
-
 module.exports = router;
