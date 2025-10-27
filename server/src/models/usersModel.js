@@ -1,5 +1,23 @@
 const db = require('../config/database'); // Assuming you have a database connection module
 
+async function hashPassword(password) {
+  const saltRounds = 10;
+  return await bcrypt.hash(password, saltRounds);
+}
+
+async function verifyPassword(password, hashedPassword) {
+  return await bcrypt.compare(password, hashedPassword);
+}
+
+// Validate password strength 
+function validatePasswordStrength(password) { // Simple example, can be enhanced. Probably should be in utils and called in AuthController too.
+  if (password.length < 6) {
+    throw new Error('Password must be at least 6 characters long');
+  }
+
+  return true;
+}
+
 // Get user by ID
 async function getUserById(userId) {
   try {
@@ -17,11 +35,16 @@ async function updateUserProfile(userId, profileData) {
   try {
     const { name, email } = profileData;
     const query = `
-      UPDATE user_id
+      UPDATE app_user
       SET username = $1, email = $2
       WHERE user_id = $3
       RETURNING user_id, username, email
     `;
+
+  // DEBUG: Log the query and parameters
+    console.log('Query:', query);
+    console.log('Parameters:', [name, email, userId]);
+
     const result = await db.query(query, [name, email, userId]);
     return result.rows[0] || null;
   } catch (error) {
@@ -32,16 +55,6 @@ async function updateUserProfile(userId, profileData) {
     console.error('Error updating user profile:', error);
     throw error;
   }
-}
-
-
-// Validate password strength 
-function validatePasswordStrength(password) { // Simple example, can be enhanced. Probably should be in utils and called in AuthController too.
-  if (password.length < 6) {
-    throw new Error('Password must be at least 6 characters long');
-  }
-
-  return true;
 }
 
 // Change user password
@@ -73,7 +86,7 @@ async function changePassword(userId, currentPassword, newPassword) {
     await db.query(updateQuery, [hashedPassword, userId]);
     return true;
   } catch (error) {
-    
+
     console.error('Error changing password:', error);
     throw error;
   }

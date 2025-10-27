@@ -2,13 +2,13 @@
 // *       User Profile Controllers    *
 // *************************************
 
-const userModel = require('../models/userModel');
+const usersModel = require('../models/usersModel');
 
 // Get user profile
 async function getUserProfile(req, res) {
   try {
     const userId = req.user.userId; // From authenticated token
-    const userProfile = await userModel.getUserById(userId);
+    const userProfile = await usersModel.getUserById(userId);
 
     if (!userProfile) {
       return res.status(404).json({ error: 'User not found' });
@@ -32,10 +32,10 @@ async function updateUserProfile(req, res) {
 
     // Validate input
     if (!name || !email) {
-      return res.status(400).json({ error: 'Name and email are required' });
+      return res.status(400).json({ error: 'UserName and email are required' });
     }
 
-    const updatedProfile = await userModel.updateUserProfile(userId, { name, email });
+    const updatedProfile = await usersModel.updateUserProfile(userId, { name, email });
 
     if (!updatedProfile) {
       return res.status(404).json({ error: 'User not found' });
@@ -67,7 +67,7 @@ async function changeUserPassword(req, res) {
       return res.status(400).json({ error: 'Current and new passwords are required' });
     }
 
-    const passwordChanged = await userModel.changePassword(userId, currentPassword, newPassword);
+    const passwordChanged = await usersModel.changePassword(userId, currentPassword, newPassword);
 
     if (!passwordChanged) {
       return res.status(400).json({ error: 'Failed to change password. Check your current password.' });
@@ -103,7 +103,7 @@ async function deleteUserProfile(req, res) {
     }
 
     // Verify password before deletion
-    const isPasswordValid = await userModel.verifyUserPassword(userId, password);
+    const isPasswordValid = await usersModel.verifyUserPassword(userId, password);
     
     if (!isPasswordValid) {
       return res.status(401).json({ 
@@ -112,7 +112,7 @@ async function deleteUserProfile(req, res) {
     }
 
     // Proceed with deletion
-    const deletedUser = await userModel.deleteUser(userId);
+    const deletedUser = await usersModel.deleteUser(userId);
 
     if (!deletedUser) {
       return res.status(404).json({ error: 'User not found' });
