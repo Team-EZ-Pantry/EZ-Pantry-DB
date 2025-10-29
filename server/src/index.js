@@ -43,7 +43,6 @@ app.use('/api/users', profileRoutes);
 
 
 
-
 // Start the server
 async function startServer() {
   try {

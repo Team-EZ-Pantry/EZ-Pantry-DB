@@ -1,22 +1,5 @@
-const db = require('../config/database'); // Assuming you have a database connection module
-
-async function hashPassword(password) {
-  const saltRounds = 10;
-  return await bcrypt.hash(password, saltRounds);
-}
-
-async function verifyPassword(password, hashedPassword) {
-  return await bcrypt.compare(password, hashedPassword);
-}
-
-// Validate password strength 
-function validatePasswordStrength(password) { // Simple example, can be enhanced. Probably should be in utils and called in AuthController too.
-  if (password.length < 6) {
-    throw new Error('Password must be at least 6 characters long');
-  }
-
-  return true;
-}
+const db = require('../config/database'); 
+const bcrypt = require('bcrypt'); 
 
 // Get user by ID
 async function getUserById(userId) {
@@ -41,10 +24,6 @@ async function updateUserProfile(userId, profileData) {
       RETURNING user_id, username, email
     `;
 
-  // DEBUG: Log the query and parameters
-    console.log('Query:', query);
-    console.log('Parameters:', [name, email, userId]);
-
     const result = await db.query(query, [name, email, userId]);
     return result.rows[0] || null;
   } catch (error) {
@@ -57,40 +36,27 @@ async function updateUserProfile(userId, profileData) {
   }
 }
 
-// Change user password
-async function changePassword(userId, currentPassword, newPassword) {
-  try {
-    // Validate new password strength
-    validatePasswordStrength(newPassword);
+  // Get user by user_id
+//  async function getUserById(userId) {
+//     try {
+//       const query = 'SELECT user_id, username, email, password_hash, created_at FROM app_user WHERE user_id = $1';
+//       const result = await db.query(query, [userId]);
+//       return result.rows[0] || null;
+//     } catch (error) {
+//       throw new Error(`Database error: ${error.message}`);
+//     }
+//   }
 
-    // Verify current password
-    const fetchQuery = 'SELECT password_hash FROM app_user WHERE user_id = $1';
-    const userResult = await db.query(fetchQuery, [userId]);
-
-    if (userResult.rows.length === 0) {
-      return false; // User not found
+  // Update user password
+  async function changeUserPassword(userId, newPasswordHash) {
+    try {
+      const query = 'UPDATE app_user SET password_hash = $1 WHERE user_id = $2';
+      const result = await db.query(query, [newPasswordHash, userId]);
+      return result.rowCount > 0;
+    } catch (error) {
+      throw new Error(`Database error: ${error.message}`);
     }
-
-    const isPasswordValid = await verifyPassword(currentPassword, userResult.rows[0].password); // Assuming verifyPassword is a utility function
-    if (!isPasswordValid) {
-      return false; // Current password is incorrect
-    }
-
-    // Update to new password
-    const hashedPassword = await hashPassword(newPassword); // Assuming hashPassword is a utility function
-    const updateQuery = `
-      UPDATE app_user
-      SET password_hash = $1
-      WHERE user_id = $2
-    `;
-    await db.query(updateQuery, [hashedPassword, userId]);
-    return true;
-  } catch (error) {
-
-    console.error('Error changing password:', error);
-    throw error;
   }
-}
 
 // Delete user
 async function deleteUser(userId) {
@@ -104,34 +70,9 @@ async function deleteUser(userId) {
   }
 }
 
-// Utility functions for password hashing and verification
-const bcrypt = require('bcrypt');
-
-async function hashPassword(password) {
-  const saltRounds = 10;
-  return await bcrypt.hash(password, saltRounds);
-}
-
-async function verifyUserPassword(userId, password) {
-  try {
-    const query = 'SELECT password_hash FROM app_user WHERE user_id = $1';
-    const result = await db.query(query, [userId]);
-    
-    if (result.rows.length === 0) {
-      return false; // User not found
-    }
-    
-    return await verifyPassword(password, result.rows[0].password);
-  } catch (error) {
-    console.error('Error verifying user password:', error);
-    throw error;
-  }
-}
-
 module.exports = {
   getUserById,
   updateUserProfile,
-  changePassword,
+  changeUserPassword,
   deleteUser,
-  verifyUserPassword,
 };

@@ -3,6 +3,7 @@
 // *************************************
 
 const usersModel = require('../models/usersModel');
+const { hashPassword, verifyPassword, validatePassword } = require('../utils/passwordUtils');
 
 // Get user profile
 async function getUserProfile(req, res) {
@@ -59,26 +60,75 @@ async function updateUserProfile(req, res) {
 // Change user password
 async function changeUserPassword(req, res) {
   try {
-    const userId = req.user.userId;
-    const { currentPassword, newPassword } = req.body;
+    const { userId, currentPassword, newPassword } = req.body;
 
     // Validate input
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ error: 'Current and new passwords are required' });
+    if (!userId || !currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID, current password, and new password are required'
+      });
     }
 
-    const passwordChanged = await usersModel.changePassword(userId, currentPassword, newPassword);
-
-    if (!passwordChanged) {
-      return res.status(400).json({ error: 'Failed to change password. Check your current password.' });
+    // Validate new password strength
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: passwordValidation.message
+      });
     }
 
-    res.json({
-      message: 'Password changed successfully',
+    // Check if new password is same as current
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be different from current password'
+      });
+    }
+
+    // Get user from database
+    const user = await UserModel.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isPasswordValid = await verifyPassword(currentPassword, user.password_hash);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Hash new password
+    const newPasswordHash = await hashPassword(newPassword);
+
+    // Update password in database
+    const updateSuccess = await UserModel.updatePassword(userId, newPasswordHash);
+    if (!updateSuccess) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to update password'
+      });
+    }
+
+    // Success response
+    return res.status(200).json({
+      success: true,
+      message: 'Password changed successfully'
     });
+
   } catch (error) {
     console.error('Change password error:', error);
-    res.status(500).json({ error: 'Failed to change password' });
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while changing password'
+    });
   }
 }
 
