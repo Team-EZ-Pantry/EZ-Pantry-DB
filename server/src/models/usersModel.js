@@ -36,19 +36,19 @@ async function updateUserProfile(userId, profileData) {
   }
 }
 
-  // Get user by user_id
-//  async function getUserById(userId) {
-//     try {
-//       const query = 'SELECT user_id, username, email, password_hash, created_at FROM app_user WHERE user_id = $1';
-//       const result = await db.query(query, [userId]);
-//       return result.rows[0] || null;
-//     } catch (error) {
-//       throw new Error(`Database error: ${error.message}`);
-//     }
-//   }
+// Get user by user_id for password change
+ async function getUserByIdPassword(userId) {
+    try {
+      const query = 'SELECT user_id, username, email, password_hash, created_at FROM app_user WHERE user_id = $1';
+      const result = await db.query(query, [userId]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Database error: ${error.message}`);
+    }
+  }
 
   // Update user password
-  async function changeUserPassword(userId, newPasswordHash) {
+  async function updateUserPassword(userId, newPasswordHash) {
     try {
       const query = 'UPDATE app_user SET password_hash = $1 WHERE user_id = $2';
       const result = await db.query(query, [newPasswordHash, userId]);
@@ -73,6 +73,7 @@ async function deleteUser(userId) {
 module.exports = {
   getUserById,
   updateUserProfile,
-  changeUserPassword,
+  getUserByIdPassword,
+  updateUserPassword,
   deleteUser,
 };

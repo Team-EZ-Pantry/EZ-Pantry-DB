@@ -88,7 +88,7 @@ async function changeUserPassword(req, res) {
     }
 
     // Get user from database
-    const user = await UserModel.getUserById(userId);
+    const user = await usersModel.getUserByIdPassword(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -109,7 +109,7 @@ async function changeUserPassword(req, res) {
     const newPasswordHash = await hashPassword(newPassword);
 
     // Update password in database
-    const updateSuccess = await UserModel.updatePassword(userId, newPasswordHash);
+    const updateSuccess = await usersModel.updateUserPassword(userId, newPasswordHash);
     if (!updateSuccess) {
       return res.status(500).json({
         success: false,
