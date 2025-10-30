@@ -3,6 +3,7 @@
 // *************************************
 
 const usersModel = require('../models/usersModel');
+const { verifyUserExists, verifyUserPassword, deleteUserById } = require('../models/usersModel');
 const { hashPassword, verifyPassword, validatePassword } = require('../utils/passwordUtils');
 
 // Get user profile
@@ -135,45 +136,83 @@ async function changeUserPassword(req, res) {
 // Delete user profile
 async function deleteUserProfile(req, res) {
   try {
-    const userId = req.user.userId;
+    const userId = parseInt(req.params.userId);
     const { password, confirmDelete } = req.body;
-
-    // Validate confirmation flag
-    if (confirmDelete !== true) {
-      return res.status(400).json({ 
-        error: 'Account deletion must be confirmed. Set confirmDelete to true.' 
-      });
-    }
-
-    // Validate password confirmation
-    if (!password) {
-      return res.status(400).json({ 
-        error: 'Password confirmation is required to delete your account' 
-      });
-    }
-
-    // Verify password before deletion
-    const isPasswordValid = await usersModel.verifyUserPassword(userId, password);
     
-    if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'Invalid password. Account deletion cancelled.' 
+    // Validate user ID format
+    if (isNaN(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: 'User ID must be a valid positive number'
       });
     }
-
-    // Proceed with deletion
-    const deletedUser = await usersModel.deleteUser(userId);
-
-    if (!deletedUser) {
-      return res.status(404).json({ error: 'User not found' });
+    
+    // Step 1: Validate confirmation flag
+    if (confirmDelete !== true) {
+      return res.status(400).json({
+        error: 'Account deletion must be confirmed. Set confirmDelete to true'
+      });
     }
-
-    res.json({
-      message: 'User account deleted successfully',
+    
+    // Step 2: Validate password is provided
+    if (!password) {
+      return res.status(400).json({
+        error: 'Password confirmation is required to delete your account'
+      });
+    }
+    
+    // Step 3: Verify the user exists
+    const userExists = await usersModel.verifyUserExists(userId);
+    if (!userExists) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+    
+    // Step 4: Verify the user ID matches the authenticated user 
+    if (req.user && req.user.userId !== userId) {
+      console.log('Authenticated user:', req.user);
+      console.log('Authenticated user ID:', req.user.id);
+      console.log('Requested user ID for deletion:', userId);
+      return res.status(403).json({
+        error: 'You can only delete your own account'
+      });
+    }
+    
+    // Step 5: Verify the password is correct
+    const passwordValid = await usersModel.verifyUserPassword(userId, password);
+    if (!passwordValid) {
+      return res.status(401).json({
+        error: 'Invalid password'
+      });
+    }
+    
+    // Step 6: All checks passed - delete the user
+    const result = await usersModel.deleteUserById(userId);
+    
+    if (!result.success) {
+      return res.status(500).json({
+        error: result.message
+      });
+    }
+    
+    return res.status(200).json({
+      message: 'User deleted successfully',
+      deletedUser: result.deletedUser
     });
+    
   } catch (error) {
-    console.error('Delete user profile error:', error);
-    res.status(500).json({ error: 'Failed to delete user account' });
+    console.error('Error in deleteUserProfile:', error);
+    
+    // Handle specific database errors
+    if (error.code === '23503') {
+      return res.status(409).json({
+        error: 'Cannot delete user due to existing related records'
+      });
+    }
+    
+    return res.status(500).json({
+      error: 'An error occurred while deleting the user'
+    });
   }
 }
 

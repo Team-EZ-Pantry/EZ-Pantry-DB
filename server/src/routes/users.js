@@ -10,7 +10,6 @@ const { authenticateToken } = require('../middleware/auth');
 router.get('/profile', authenticateToken, usersController.getUserProfile);
 router.put('/profile', authenticateToken, usersController.updateUserProfile);
 router.put('/password', usersController.changeUserPassword); // could be POST authenticateToken,
-router.delete('/account', authenticateToken, usersController.deleteUserProfile); 
+router.delete('/:userId', authenticateToken, usersController.deleteUserProfile); 
 
 module.exports = router;
-
