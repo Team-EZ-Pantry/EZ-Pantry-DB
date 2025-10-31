@@ -4,8 +4,14 @@
 
 const productModel = require('../models/productModel');
 
-// Search products for autocomplete
-// Query params: ?q=milk and ?limit=10 (optional)
+// *************************************
+// *         Regular Products          *
+// *************************************
+
+// *******************************************
+// * Search products by name (partial match) *
+// *******************************************
+// Query params: ?q=milk (required) and ?limit=10 (optional)
 async function searchProducts(req, res) {
   try {
     const { q, limit } = req.query;
@@ -46,26 +52,9 @@ async function searchProducts(req, res) {
   }
 }
 
-// Get product details by ID
-async function getProductById(req, res) {
-  try {
-    const { productId } = req.params;
-
-    const product = await productModel.findById(productId);
-
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-
-    res.json({ product });
-
-  } catch (error) {
-    console.error('Get product error:', error);
-    res.status(500).json({ error: 'Failed to fetch product' });
-  }
-}
-
-// Get product by barcode (for scanning)
+// *****************************************
+// * Get product by barcode (for scanning) *
+// *****************************************
 async function getProductByBarcode(req, res) {
     try {
       const { barcode } = req.params;
@@ -87,8 +76,114 @@ async function getProductByBarcode(req, res) {
     }
   }
 
+// *************************************
+// *          Custom Products          *
+// *************************************
+
+// **************************************************
+// * Create a custom product associated with a user *
+// **************************************************
+async function createCustomProduct(req, res) {
+  try {
+    const userId = req.user.userId;
+    const productData = req.body;
+
+    // Validate required fields
+    if (!productData.product_name || productData.product_name.trim() === '') {
+      return res.status(400).json({ error: 'Product name is required' });
+    }
+
+    const customProduct = await productModel.createCustomProduct(userId, productData);
+
+    res.status(201).json({ customProduct });
+  } catch (error) {
+    console.error('Create custom product error:', error);
+    res.status(500).json({ error: 'Failed to create custom product' });
+  }
+}
+
+// **************************************************
+// * Delete a custom product associated with a user *
+// **************************************************
+async function deleteCustomProduct(req, res) {
+  try {
+    const userId = req.user.userId;
+    const { customProductId } = req.params;
+
+    const deletedCustomProduct = await productModel.deleteCustomProduct(userId, customProductId);
+
+    res.status(200).json({ deletedCustomProduct });
+  } catch (error) {
+    console.error('Delete custom product error:', error);
+    res.status(500).json({ error: 'Failed to delete custom product' });
+  }
+}
+
+// ******************************************************************
+// * Get all custom products associated with the authenticated user *
+// ******************************************************************
+async function getMyCustomProducts(req, res) {
+  try {
+    const userId = req.user.userId;
+
+    const customProducts = await productModel.getMyCustomProducts(userId);
+
+    res.status(200).json({ customProducts });
+  } catch (error) {
+    console.error('Error getting custom products:', error);
+    res.status(500).json({ error: 'Failed to fetch custom products' });
+  }
+}
+
+// ******************************************************************
+// *             Modify a custom product's information              *
+// ******************************************************************
+/*async function modifyCustomProduct(req, res) {
+  try {
+    const userId = req.user.userId;
+    const { customProductId } = req.params;
+    const updateData = req.body;
+
+    const updatedCustomProduct = await productModel.modifyCustomProduct(
+      userId,
+      customProductId,
+      updateData
+    );
+
+    res.status(200).json({ updatedCustomProduct });
+  } catch (error) {
+    console.error('Modify custom product error:', error);
+    res.status(500).json({ error: 'Failed to modify custom product' });
+  }
+}*/
+
+// ******************************************************************
+// *           Permanently delete a user's custom product           *
+// ******************************************************************
+async function deleteCustomProduct(req, res) {
+  try {
+    const userId = req.user.userId;
+    const { customProductId } = req.params;
+
+    const deletedCustomProduct = await productModel.deleteCustomProduct(userId, customProductId);
+
+    res.status(200).json({ 
+      message: 'Custom product deleted',
+      deletedCustomProduct 
+    });
+  } catch (error) {
+    console.error('Error getting custom products:', error);
+    res.status(500).json({ error: 'Failed to fetch custom products' });
+  }
+}
+
+
 module.exports = {
   searchProducts,
   getProductByBarcode,
-  getProductById
+  createCustomProduct,
+  deleteCustomProduct,
+  getMyCustomProducts,
+  //modifyCustomProduc
+  deleteCustomProduct
 };

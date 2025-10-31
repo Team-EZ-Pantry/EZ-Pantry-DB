@@ -18,3 +18,14 @@ CREATE TABLE pantry (
     is_default BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Add custom_product_id column to pantry_product table
+ALTER TABLE pantry_product
+ADD COLUMN custom_product_id INT REFERENCES custom_product(custom_product_id) ON DELETE CASCADE;
+
+-- Ensure that either product_id or custom_product_id is set, but not both
+ALTER TABLE pantry_product
+ADD CONSTRAINT check_product_or_custom CHECK (
+    (product_id IS NOT NULL AND custom_product_id IS NULL) OR
+    (product_id IS NULL AND custom_product_id IS NOT NULL)
+);

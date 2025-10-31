@@ -15,6 +15,7 @@
     - [Delete Pantry 🔒](#delete-pantry)
     - [Get All Pantries for a User 🔒](#get-all-pantries-for-a-user)
     - [Get Pantry 🔒](#get-pantry)
+    - [Update Pantry Name 🔒](#update-pantry-name)
   - [Pantry Product Endpoints](#pantry-product-endpoints)
     - [Add Product to Pantry 🔒](#add-product-to-pantry)
     - [Remove Product from Pantry 🔒](#remove-product-from-pantry)
@@ -24,6 +25,7 @@
     - [Search Products 🔒](#search-products)
     - [Get Product by Barcode 🔒](#get-product-by-barcode)
     - [Get Product by ID 🔒](#get-product-by-id)
+    - [Create Custom Product 🔒](#create-custom-product)
 
 ## EZ Pantry Features
 
@@ -32,13 +34,12 @@
 ✅ Create, delete, modify pantries \
 ✅ Add and remove products, modify quantity and expiration \
 ✅ Product search with autocomplete \
-*Custom products associated with a user* \
+✅ Custom products associated with a user \
 *Create and save shopping lists, autoadd them to pantries* \
 *Barcode scanning* \
 *User product submission to the product database (?)* \
 *Pantry/shopping list sharing between users* \
 *LLM recipe generation + custom recipes + saving recipes*
-
 
 ## Quick Start
 
@@ -77,7 +78,7 @@ inside EZ-Pantry-DB/server/src, run ```node index.js```. (Press ctrl + C to stop
 ```
 http://localhost:3000
 ```
-## Authentication 🔒
+## Authentication
 USE THE HEADER: Authorization: Bearer {token} \
 Example:
 ```
@@ -109,6 +110,8 @@ Check if the server is running.
 #### Status Codes
 - `200` - Success
 - `503` - Service Unavailable (database issues)
+
+---
 
 ## Authentication Endpoints
 
@@ -197,6 +200,7 @@ Register a new user account in the database.
 | `409` | Conflict (user already exists) |
 | `500` | Internal server error |
 
+---
 
 ### Login
 **POST** `/api/auth/login`
@@ -266,6 +270,8 @@ Login with an email and password to receive a JWT.
 | `400` | Bad request (validation failed) |
 | `401` | Unauthorized |
 | `500` | Internal server error |
+
+---
 
 ### Me
 **GET** `/api/auth/me`
@@ -338,6 +344,8 @@ Authorization: Bearer user.token.here
 | `403` | Bad or expired token |
 | `404` | User not found |
 | `500` | Internal server error |
+
+---
 
 ## Pantry Endpoints
 
@@ -422,6 +430,8 @@ Authorization: Bearer user.token.here
 | `403` | Bad or expired token |
 | `500` | Internal server error |
 
+---
+
 ### Delete Pantry
 **DELETE** `/api/pantry/:pantryid`
 
@@ -502,6 +512,8 @@ Authorization: Bearer user.token.here
 | `404` | Pantry ID not found |
 | `500` | Internal server error |
 
+---
+
 ### Get All Pantries for a User
 **GET** `/api/pantry`
 
@@ -575,6 +587,8 @@ Authorization: Bearer user.token.here
 | `401` | No token |
 | `403` | Bad or expired token |
 | `500` | Internal server error |
+
+---
 
 ### Get Pantry
 **GET** `/api/pantry/:pantryid`
@@ -661,27 +675,17 @@ Authorization: Bearer user.token.here
 | `404` | Pantry not found |
 | `500` | Internal server error |
 
-## Pantry Product Endpoints
+### Update Pantry Name
+**GET** `/api/pantry/:pantryid/name`
 
-### Add Product to Pantry
-**POST** `/api/pantry/:pantryid/products`
-
-Add a product to a given pantry
+Get a specific pantry by ID
 
 #### Request Body 
 ```json
 {
-    "productId" : "1",
-    "quantity": "3",
-    "expirationDate": "10-10-2026"
+    "name" : "My Pantry"
 }
 ```
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `productId` | string | Yes | ID of the product to be added |
-| `quantity` | string | Yes | Number of products to add |
-| `expirationDate` | date | No | Expiration date of the product |
 
 #### Request Header
 ```
@@ -689,16 +693,17 @@ Authorization: Bearer user.token.here
 ```
 
 #### Success Response
-**Code:** `201 Created`
+**Code:** `200 OK`
 
 ```json
 {
-    "message": "Product added to pantry",
-    "product": {
+    "message": "Pantry name updated",
+    "pantry": {
         "pantry_id": 13,
-        "product_id": 1,
-        "quantity": 6,
-        "expiration_date": "2026-10-10T05:00:00.000Z"
+        "user_id": 2,
+        "name": "My Pantry",
+        "is_default": false,
+        "created_at": "2025-10-16T01:22:09.581Z"
     }
 }
 ```
@@ -708,10 +713,10 @@ Authorization: Bearer user.token.here
 <details>
 <summary>Click to view all error codes</summary>
 
-**Code** `400 Bad Request`
+**Code:** `400 Bad Request`
 ```json
 {
-    "error": "Product ID and quantity are required"
+    "error": "Name is required"
 }
 ```
 
@@ -729,7 +734,7 @@ Authorization: Bearer user.token.here
 }
 ```
 
-**Code:** `404 Not Found`
+**Code:** `404 Bad Request`
 ```json
 {
     "error": "Pantry not found"
@@ -739,7 +744,7 @@ Authorization: Bearer user.token.here
 **Code** `500 Internal Server Error`
 ```json
 {
-    "error": "Failed to create product"
+    "error": "Failed to update pantry name"
 }
 ```
 
@@ -748,12 +753,111 @@ Authorization: Bearer user.token.here
 #### Status Codes
 | Code | Description |
 |------|-------------|
-| `201` | Product added successfully  |
-| `400` | Invalid input (missing product ID or quantity) |
+| `200` | Pantry name updated  |
+| `401` | Name not provided |
 | `401` | No token |
 | `403` | Bad or expired token |
 | `404` | Pantry not found |
 | `500` | Internal server error |
+
+---
+
+## Pantry Product Endpoints
+
+### Add Product to Pantry
+**POST** `/api/pantry/:pantryid/products`
+
+Add a product to a users's pantry. You must provide either `productId` or `customProductId`, but not both.
+
+#### Request Body
+```json
+{
+    "productId": "1", // OR
+    "customProductId": "2",
+    "quantity": 3,
+    "expirationDate": "2026-10-10"
+}
+```
+
+| Field              | Type   | Required | Description                              |
+|--------------------|--------|----------|------------------------------------------|
+| `productId`        | string | No       | ID of the normal product to be added     |
+| `customProductId`  | string | No       | ID of the custom product to be added     |
+| `quantity`         | number | Yes      | Number of products to add               |
+| `expirationDate`   | date   | No       | Expiration date of the product           |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `201 Created`
+
+```json
+{
+    "message": "Product added to pantry",
+    "product": {
+        "pantry_id": 13,
+        "product_id": null,
+        "custom_product_id": 2,
+        "quantity": 3,
+        "expiration_date": "2026-10-10T00:00:00.000Z"
+    }
+}
+```
+
+#### Error Responses
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code** `400 Bad Request`
+```json
+{
+    "error": "Provide either productId or customProductId, not both"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Quantity must be greater than 0"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Pantry not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to add product to pantry"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `201` | Product added successfully |
+| `400` | Invalid input (e.g., both `productId` and `customProductId` provided) |
+| `401` | No token or invalid token |
+| `404` | Pantry not found |
+| `500` | Internal server error |
+
+---
 
 ### Remove Product from Pantry
 **DELETE** `/api/pantry/:pantryid/products/:productid`
@@ -833,6 +937,8 @@ Authorization: Bearer user.token.here
 | `404` | Pantry not found |
 | `404` | Product not found in pantry |
 | `500` | Internal server error |
+
+---
 
 ### Update Product Quantity
 **PUT** `/api/pantry/:pantryid/products/:productid/quantity`
@@ -930,6 +1036,8 @@ Authorization: Bearer user.token.here
 | `404` | Product not found in pantry |
 | `500` | Internal server error |
 
+---
+
 ### Update Product Expiration Date
 **PUT** `/api/pantry/:pantryid/products/:productid/expiration`
 
@@ -1025,6 +1133,8 @@ Authorization: Bearer user.token.here
 | `404` | Pantry not found |
 | `404` | Product not found in pantry |
 | `500` | Internal server error |
+
+---
 
 ## Product Endpoints
 
@@ -1134,6 +1244,20 @@ Authorization: Bearer user.token.here
 <details>
 <summary>Click to view all error codes</summary>
 
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
 **Code:** `404 Not Found`
 ```json
 {
@@ -1155,6 +1279,8 @@ Authorization: Bearer user.token.here
 | Code | Description |
 |------|-------------|
 | `200` | Product retrieved successfully |
+| `401` | No token |
+| `403` | Invalid token |
 | `404` | Product not found |
 | `500` | Internal server error |
 
@@ -1194,6 +1320,20 @@ Authorization: Bearer user.token.here
 <details>
 <summary>Click to view all error codes</summary>
 
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
 **Code:** `404 Not Found`
 ```json
 {
@@ -1214,5 +1354,119 @@ Authorization: Bearer user.token.here
 | Code | Description |
 |------|-------------|
 | `200` | Product retrieved successfully |
+| `401` | No token |
+| `403` | Invalid token |
 | `404` | Product not found |
+| `500` | Internal server error |
+
+---
+
+### Create Custom Product
+**POST** `/api/products/custom`
+
+Create a new custom product associated with the authenticated user.
+
+#### Request Body
+```json
+{
+    "product_name": "Custom Product Name",
+    "brand": "Custom Brand",
+    "image_url": "http://example.com/image.jpg",
+    "categories": ["Category1", "Category2"],
+    "allergens": ["Allergen1", "Allergen2"],
+    "calories_per_100g": 100,
+    "protein_per_100g": 5,
+    "carbs_per_100g": 20,
+    "fat_per_100g": 2,
+    "nutrition": {
+        "fiber": 3,
+        "sugar": 10
+    }
+}
+```
+
+| Field                | Type     | Required | Description                          |
+|----------------------|----------|----------|--------------------------------------|
+| `product_name`       | string   | Yes      | Name of the custom product           |
+| `brand`              | string   | No       | Brand of the custom product          |
+| `image_url`          | string   | No       | URL of the product image             |
+| `categories`         | array    | No       | Categories associated with the product |
+| `allergens`          | array    | No       | Allergens associated with the product |
+| `calories_per_100g`  | number   | No       | Calories per 100g                    |
+| `protein_per_100g`   | number   | No       | Protein per 100g                     |
+| `carbs_per_100g`     | number   | No       | Carbohydrates per 100g               |
+| `fat_per_100g`       | number   | No       | Fat per 100g                         |
+| `nutrition`          | object   | No       | Additional nutritional information   |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `201 Created`
+```json
+{
+    "customProduct": {
+        "custom_product_id": 1,
+        "user_id": 1,
+        "product_name": "Custom Product Name",
+        "brand": "Custom Brand",
+        "image_url": "http://example.com/image.jpg",
+        "categories": ["Category1", "Category2"],
+        "allergens": ["Allergen1", "Allergen2"],
+        "calories_per_100g": 100,
+        "protein_per_100g": 5,
+        "carbs_per_100g": 20,
+        "fat_per_100g": 2,
+        "nutrition": {
+            "fiber": 3,
+            "sugar": 10
+        },
+        "created_at": "2023-10-10T10:00:00.000Z"
+    }
+}
+```
+
+#### Error Responses
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Product name is required"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to create custom product"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `201` | Custom product created successfully |
+| `400` | Invalid input (e.g., missing product name) |
+| `401` | No token |
+| `403` | Invalid token |
 | `500` | Internal server error |

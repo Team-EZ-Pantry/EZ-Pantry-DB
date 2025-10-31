@@ -2,21 +2,28 @@ const express = require('express');
 const router = express.Router();
 const pantryController = require('../controllers/pantryController');
 const { authenticateToken } = require('../middleware/auth');
+const { validateCustomProductAccess, validatePantryAccess } = require('../middleware/validation');
 
 // *************************************
-// *         Pantry Endpoints          *
+// *     Pantry Product Endpoints      *
 // *************************************
 // Pantry management
-router.get('/', authenticateToken, pantryController.getAllPantries);
-router.post('/', authenticateToken, pantryController.createPantry);
-router.get('/:pantryId', authenticateToken, pantryController.getPantry);
-router.put('/:pantryId', authenticateToken, pantryController.updatePantry);
-router.delete('/:pantryId', authenticateToken, pantryController.deletePantry);
+router.post('/', authenticateToken,                                      pantryController.createPantry);
+router.delete('/:pantryId', authenticateToken, validatePantryAccess,     pantryController.deletePantry);
+router.get('/', authenticateToken,                                       pantryController.getAllPantriesForUser);
+router.get('/:pantryId', authenticateToken, validatePantryAccess,        pantryController.getPantry);
+router.patch('/:pantryId/name', authenticateToken, validatePantryAccess, pantryController.updatePantryName);
 
 // Product management within pantries
-router.post('/:pantryId/products', authenticateToken, pantryController.addProductToPantry);
-router.delete('/:pantryId/products/:productId', authenticateToken, pantryController.removeProductFromPantry);
-router.put('/:pantryId/products/:productId/quantity', authenticateToken, pantryController.updateProductQuantity);
-router.put('/:pantryId/products/:productId/expiration', authenticateToken, pantryController.updateProductExpiration);
+router.post('/:pantryId/products/:productId', authenticateToken, validatePantryAccess, pantryController.addProduct);
+router.delete('/:pantryId/products/:productId', authenticateToken, validatePantryAccess, pantryController.removeProduct);
+router.patch('/:pantryId/products/:productId/quantity', authenticateToken, validatePantryAccess, pantryController.updateProductQuantity);
+router.patch('/:pantryId/products/:productId/expiration', authenticateToken, validatePantryAccess, pantryController.updateProductExpiration);
+
+// Custom products within pantries
+router.post('/:pantryId/custom-products/:customProductId', authenticateToken, validatePantryAccess, validateCustomProductAccess, pantryController.addCustomProduct);
+router.delete('/:pantryId/custom-products/:customProductId', authenticateToken, validatePantryAccess, validateCustomProductAccess, pantryController.removeCustomProduct);
+router.patch('/:pantryId/custom-products/:customProductId/quantity', authenticateToken, validatePantryAccess, validateCustomProductAccess, pantryController.updateCustomProductQuantity);
+router.patch('/:pantryId/custom-products/:customProductId/expiration', authenticateToken, validatePantryAccess, validateCustomProductAccess, pantryController.updateCustomProductExpiration);
 
 module.exports = router;
