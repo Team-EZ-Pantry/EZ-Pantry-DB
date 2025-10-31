@@ -24,7 +24,6 @@
   - [Product Endpoints](#product-endpoints)
     - [Search Products 🔒](#search-products)
     - [Get Product by Barcode 🔒](#get-product-by-barcode)
-    - [Get Product by ID 🔒](#get-product-by-id)
     - [Create Custom Product 🔒](#create-custom-product)
 
 ## EZ Pantry Features
@@ -1263,81 +1262,6 @@ Authorization: Bearer user.token.here
 {
     "error": "Product not found",
     "barcode": "123456789"
-}
-```
-
-**Code:** `500 Internal Server Error`
-```json
-{
-    "error": "Failed to fetch product"
-}
-```
-
-</details>
-
-#### Status Codes
-| Code | Description |
-|------|-------------|
-| `200` | Product retrieved successfully |
-| `401` | No token |
-| `403` | Invalid token |
-| `404` | Product not found |
-| `500` | Internal server error |
-
----
-
-#### Get Product by ID
-**GET** `/api/products/:productId`
-
-Retrieve product details by product ID.
-
-#### Request Parameters
-| Parameter   | Type   | Required | Description          |
-|-------------|--------|----------|----------------------|
-| `productId` | string | Yes      | ID of the product |
-
-#### Request Header
-```
-Authorization: Bearer user.token.here
-```
-
-#### Success Response
-**Code:** `200 OK`
-```json
-{
-    "product": {
-        "product_id": 1,
-        "product_name": "Milk",
-        "brand": "Brand A",
-        "barcode": "123456789",
-        "image_url": null,
-        "calories_per_100g": 42
-    }
-}
-```
-
-#### Error Responses
-<details>
-<summary>Click to view all error codes</summary>
-
-**Code:** `401 Unauthorized`
-```json
-{
-    "error": "Access denied. No token provided"
-}
-```
-
-**Code:** `403 Forbidden`
-```json
-{
-    "error": "Invalid or expired token"
-}
-```
-
-**Code:** `404 Not Found`
-```json
-{
-    "error": "Product not found"
 }
 ```
 
