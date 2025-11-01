@@ -1021,3 +1021,39 @@ Authorization: Bearer user.token.here
 | `404` | Pantry not found |
 | `404` | Product not found in pantry |
 | `500` | Internal server error |
+
+
+### Profile test cases
+### ============================================
+GET http://localhost:3000/api/users/profile
+Authorization: Bearer {{token}}
+
+### Update username and email
+PUT http://localhost:3000/api/users/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "test2",
+  "email": "test2@gmail.com"
+}
+
+### Change password
+PUT http://localhost:3000/api/users/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "pass123",
+  "newPassword": "pass123"
+}
+
+### Delete user Profile
+DELETE http://localhost:3000/api/users/account
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "password": "pass123",
+  "confirmDelete": true
+}
