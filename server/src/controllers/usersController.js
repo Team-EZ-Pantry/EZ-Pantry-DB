@@ -3,13 +3,12 @@
 // *************************************
 
 const usersModel = require('../models/usersModel');
-const { verifyUserExists, verifyUserPassword, deleteUserById } = require('../models/usersModel');
 const { hashPassword, verifyPassword, validatePassword } = require('../utils/passwordUtils');
 
 // Get user profile
 async function getUserProfile(req, res) {
   try {
-    const userId = req.user.userId; // From authenticated token
+    const userId = req.user.userId; 
     const userProfile = await usersModel.getUserById(userId);
 
     if (!userProfile) {
@@ -37,6 +36,14 @@ async function updateUserProfile(req, res) {
       return res.status(400).json({ error: 'UserName and email are required' });
     }
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        error: 'Invalid email format' 
+      });
+    }
+
     const updatedProfile = await usersModel.updateUserProfile(userId, { name, email });
 
     if (!updatedProfile) {
@@ -61,15 +68,15 @@ async function updateUserProfile(req, res) {
 // Change user password
 async function changeUserPassword(req, res) {
   try {
-    const { userId, currentPassword, newPassword } = req.body;
+  const userId = req.user.userId; // Get from authenticated token
+  const { currentPassword, newPassword } = req.body;
 
-    // Validate input
-    if (!userId || !currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'User ID, current password, and new password are required'
-      });
-    }
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: 'Current password and new password are required'
+    });
+  }
 
     // Validate new password strength
     const passwordValidation = validatePassword(newPassword);
@@ -88,17 +95,16 @@ async function changeUserPassword(req, res) {
       });
     }
 
-    // Get user from database
-    const user = await usersModel.getUserByIdPassword(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
+    // Get user password hash from database
+    const passwordHash = await usersModel.getUserPasswordHash(userId);
+    if (!passwordHash) {
+      return res.status(401).json({
+        error: 'Invalid password'
       });
     }
 
     // Verify current password
-    const isPasswordValid = await verifyPassword(currentPassword, user.password_hash);
+    const isPasswordValid = await verifyPassword(currentPassword, passwordHash);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -136,7 +142,7 @@ async function changeUserPassword(req, res) {
 // Delete user profile
 async function deleteUserProfile(req, res) {
   try {
-    const userId = parseInt(req.params.userId);
+    const userId = req.user.userId; 
     const { password, confirmDelete } = req.body;
     
     // Validate user ID format
@@ -170,22 +176,26 @@ async function deleteUserProfile(req, res) {
     
     // Step 4: Verify the user ID matches the authenticated user 
     if (req.user && req.user.userId !== userId) {
-      console.log('Authenticated user:', req.user);
-      console.log('Authenticated user ID:', req.user.id);
-      console.log('Requested user ID for deletion:', userId);
       return res.status(403).json({
         error: 'You can only delete your own account'
       });
     }
     
     // Step 5: Verify the password is correct
-    const passwordValid = await usersModel.verifyUserPassword(userId, password);
-    if (!passwordValid) {
+    const passwordHash = await usersModel.getUserPasswordHash(userId);
+    if (!passwordHash) {
       return res.status(401).json({
         error: 'Invalid password'
       });
     }
     
+    const passwordValid = await verifyPassword(password, passwordHash);
+    if (!passwordValid) {
+      return res.status(401).json({
+        error: 'Invalid password'
+      });
+    }
+
     // Step 6: All checks passed - delete the user
     const result = await usersModel.deleteUserById(userId);
     
