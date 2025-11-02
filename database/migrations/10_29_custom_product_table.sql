@@ -47,9 +47,3 @@ WHERE custom_product_id IS NOT NULL;
 -- Index for fast lookups
 CREATE INDEX idx_pantry_product_pantry ON pantry_product(pantry_id);
 CREATE INDEX idx_pantry_product_expiration ON pantry_product(expiration_date);
-
---make categories and allergens columns default to empty arrays
-ALTER COLUMN categories TYPE TEXT[] USING '{}'::TEXT[];
-
-ALTER TABLE product 
-ALTER COLUMN allergens TYPE TEXT[] USING '{}'::TEXT[];

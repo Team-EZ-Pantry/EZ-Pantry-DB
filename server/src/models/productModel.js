@@ -110,7 +110,6 @@ async function getMyCustomProducts(userId) {
       cp.carbs_per_100g,
       cp.fat_per_100g,
       cp.nutrition,
-      cp.created_at,
       COALESCE(
         json_agg(
           json_build_object(

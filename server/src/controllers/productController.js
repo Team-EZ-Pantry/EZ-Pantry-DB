@@ -80,9 +80,9 @@ async function getProductByBarcode(req, res) {
 // *          Custom Products          *
 // *************************************
 
-// **************************************************
-// * Create a custom product associated with a user *
-// **************************************************
+// *********************************************************
+// *     Create a custom product associated with a user    *
+// *********************************************************
 async function createCustomProduct(req, res) {
   try {
     const userId = req.user.userId;
@@ -101,10 +101,9 @@ async function createCustomProduct(req, res) {
     res.status(500).json({ error: 'Failed to create custom product' });
   }
 }
-
-// **************************************************
-// * Delete a custom product associated with a user *
-// **************************************************
+// ******************************************************************
+// *           Permanently delete a user's custom product           *
+// ******************************************************************
 async function deleteCustomProduct(req, res) {
   try {
     const userId = req.user.userId;
@@ -157,26 +156,6 @@ async function getMyCustomProducts(req, res) {
   }
 }*/
 
-// ******************************************************************
-// *           Permanently delete a user's custom product           *
-// ******************************************************************
-async function deleteCustomProduct(req, res) {
-  try {
-    const userId = req.user.userId;
-    const { customProductId } = req.params;
-
-    const deletedCustomProduct = await productModel.deleteCustomProduct(userId, customProductId);
-
-    res.status(200).json({ 
-      message: 'Custom product deleted',
-      deletedCustomProduct 
-    });
-  } catch (error) {
-    console.error('Error getting custom products:', error);
-    res.status(500).json({ error: 'Failed to fetch custom products' });
-  }
-}
-
 
 module.exports = {
   searchProducts,
@@ -184,6 +163,5 @@ module.exports = {
   createCustomProduct,
   deleteCustomProduct,
   getMyCustomProducts,
-  //modifyCustomProduc
-  deleteCustomProduct
+  //modifyCustomProduct
 };

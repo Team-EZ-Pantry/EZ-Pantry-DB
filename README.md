@@ -2,29 +2,31 @@
 
 ## Table of Contents
 - [EZ Pantry Features](#ez-pantry-features)
-- [Quick Start](#-quick-start)
-  - [Authentication 🔒](#authentication)
+- [Quick Start](#fquick-start)
+- [API Authentication 🔒](#api-authentication)
 - [API Docs](#api-docs)
   - [Health Check](#health-check)
   - [Authentication Endpoints](#authentication-endpoints)
     - [Register](#register)
     - [Login](#login)
-    - [Me 🔒](#me)
+    - [Me](#me)
   - [Pantry Endpoints](#pantry-endpoints)
-    - [Create Pantry 🔒](#create-pantry)
-    - [Delete Pantry 🔒](#delete-pantry)
-    - [Get All Pantries for a User 🔒](#get-all-pantries-for-a-user)
-    - [Get Pantry 🔒](#get-pantry)
-    - [Update Pantry Name 🔒](#update-pantry-name)
-  - [Pantry Product Endpoints](#pantry-product-endpoints)
-    - [Add Product to Pantry 🔒](#add-product-to-pantry)
-    - [Remove Product from Pantry 🔒](#remove-product-from-pantry)
-    - [Update Product Quantity 🔒](#update-product-quantity)
-    - [Update Product Expiration Date 🔒](#update-product-expiration-date)
+    - [Create Pantry](#create-pantry)
+    - [Delete Pantry](#delete-pantry)
+    - [Get All Pantries for a User](#get-all-pantries-for-a-user)
+    - [Get Pantry](#get-pantry)
+    - [Update Pantry Name](#update-pantry-name)
+  - [Regular and Custom Product Endpoints](#regular-and-custom-products)
+    - [Add Product to Pantry](#add-product-to-pantry)
+    - [Remove Product from Pantry](#remove-product-from-pantry)
+    - [Update Product Quantity](#update-product-quantity)
+    - [Update Product Expiration Date](#update-product-expiration-date)
   - [Product Endpoints](#product-endpoints)
-    - [Search Products 🔒](#search-products)
-    - [Get Product by Barcode 🔒](#get-product-by-barcode)
-    - [Create Custom Product 🔒](#create-custom-product)
+    - [Search Products](#search-products)
+    - [Get Product by Barcode](#get-product-by-barcode)
+    - [Create Custom Product](#create-custom-product)
+    - [Get Custom Products](#get-custom-products)
+    - [Delete Custom Product](#delete-custom-product)
 
 ## EZ Pantry Features
 
@@ -34,9 +36,9 @@
 ✅ Add and remove products, modify quantity and expiration \
 ✅ Product search with autocomplete \
 ✅ Custom products associated with a user \
-*Create and save shopping lists, autoadd them to pantries* \
-*Barcode scanning* \
-*User product submission to the product database (?)* \
+✅ Create and save shopping lists \
+✅ Barcode scanning \
+*Shared custom product database * \
 *Pantry/shopping list sharing between users* \
 *LLM recipe generation + custom recipes + saving recipes*
 
@@ -77,7 +79,9 @@ inside EZ-Pantry-DB/server/src, run ```node index.js```. (Press ctrl + C to stop
 ```
 http://localhost:3000
 ```
-## Authentication
+## API Authentication
+🔒 All endpoints require JWT authentication with the exception of Register and Login
+
 USE THE HEADER: Authorization: Bearer {token} \
 Example:
 ```
@@ -761,18 +765,18 @@ Authorization: Bearer user.token.here
 
 ---
 
-## Pantry Product Endpoints
+## Regular and Custom Products
+Regular and Custom product functionality are identical. Simply substitute **`custom-products`** for `products` in the API URL, e.g.:
+```/api/pantry/:pantryid/custom-products/:productId```
 
 ### Add Product to Pantry
-**POST** `/api/pantry/:pantryid/products`
+**POST** `/api/pantry/:pantryid/products/:productId`
 
-Add a product to a users's pantry. You must provide either `productId` or `customProductId`, but not both.
+Add a product to a users's pantry.
 
 #### Request Body
 ```json
 {
-    "productId": "1", // OR
-    "customProductId": "2",
     "quantity": 3,
     "expirationDate": "2026-10-10"
 }
@@ -780,9 +784,7 @@ Add a product to a users's pantry. You must provide either `productId` or `custo
 
 | Field              | Type   | Required | Description                              |
 |--------------------|--------|----------|------------------------------------------|
-| `productId`        | string | No       | ID of the normal product to be added     |
-| `customProductId`  | string | No       | ID of the custom product to be added     |
-| `quantity`         | number | Yes      | Number of products to add               |
+| `quantity`         | number | Yes      | Number of products to add                |
 | `expirationDate`   | date   | No       | Expiration date of the product           |
 
 #### Request Header
@@ -851,7 +853,7 @@ Authorization: Bearer user.token.here
 | Code | Description |
 |------|-------------|
 | `201` | Product added successfully |
-| `400` | Invalid input (e.g., both `productId` and `customProductId` provided) |
+| `400` | Invalid input |
 | `401` | No token or invalid token |
 | `404` | Pantry not found |
 | `500` | Internal server error |
@@ -942,7 +944,7 @@ Authorization: Bearer user.token.here
 ### Update Product Quantity
 **PUT** `/api/pantry/:pantryid/products/:productid/quantity`
 
-Update the quantity of a product in a pantry. quantity <= 0 deletes.
+Update the quantity of a product in a pantry. (quantity <= 0 does not delete)
 
 #### Request Body
 ```json
@@ -1393,4 +1395,154 @@ Authorization: Bearer user.token.here
 | `400` | Invalid input (e.g., missing product name) |
 | `401` | No token |
 | `403` | Invalid token |
+| `500` | Internal server error |
+
+---
+
+### Get Custom Products
+**GET** `/api/products/custom`
+
+Get all custom products owned by the authenticated user and their pantry locations 
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "customProducts": [
+        {
+            "custom_product_id": 6,
+            "product_name": "Another custom",
+            "brand": "Test Brand",
+            ...
+            "fat_per_100g": null,
+            "last_modified": "2025-10-31T22:44:24.785Z"
+            "pantry_locations": [
+                {
+                    "pantry_id": 14,
+                    "pantry_name": "Another Pantry",
+                    "quantity": 1,
+                    "expiration_date": null
+                }
+            ]
+        }
+    ]
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to fetch custom products"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Custom product data retrieved successfully|
+| `401` | No token |
+| `403` | Bad or expired token |
+| `500` | Internal server error |
+
+---
+
+### Delete Custom Product
+**DELETE** `/api/products/custom/:customProductId`
+
+Permanently delete a custom product associated with a user
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "message": "Custom product deleted",
+    "deletedCustomProduct": {
+        "custom_product_id": 6,
+        "user_id": 2,
+        "product_name": "My Custom Product",
+        ...
+        "nutrition": null,
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Custom product not found"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to delete custom product"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Custom product deleted |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Custom Product not found |
 | `500` | Internal server error |
