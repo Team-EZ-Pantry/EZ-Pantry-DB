@@ -24,6 +24,14 @@
     - [Search Products 🔒](#search-products)
     - [Get Product by Barcode 🔒](#get-product-by-barcode)
     - [Get Product by ID 🔒](#get-product-by-id)
+  - [Shopping List Endpoints](#shopping-list-endpoints)
+    - [Get all shopping lists](#get-all-shopping-lists)
+    - [Create a shopping list](#create-shopping-list)
+    - [Get a shopping list](#get-shopping-list)
+    - [Delete a shopping list](#delete-shopping-list)
+    - [Add item to shopping list](#add-item-to-shopping-list)
+    - [Remove item from shopping list](#remove-item-from-shopping-list)
+    - [Toggle item checked status](#toggle-item-checked-status)
 
 ## EZ Pantry Features
 
