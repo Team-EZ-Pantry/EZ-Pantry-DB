@@ -1216,3 +1216,6 @@ Authorization: Bearer user.token.here
 | `200` | Product retrieved successfully |
 | `404` | Product not found |
 | `500` | Internal server error |
+
+## Shopping List Endpoints
+
