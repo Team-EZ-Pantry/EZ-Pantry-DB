@@ -766,7 +766,7 @@ Authorization: Bearer user.token.here
 ---
 
 ## Regular and Custom Products
-Regular and Custom product functionality are identical. Simply substitute **`custom-products`** for `products` in the API URL, e.g.:
+Regular and custom product functionality is identical. Simply substitute **`custom-products`** for `products` in the API URL, e.g.:
 ```/api/pantry/:pantryid/custom-products/:productId```
 
 ### Add Product to Pantry
