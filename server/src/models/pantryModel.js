@@ -34,6 +34,9 @@ async function getPantryWithProducts(pantryId, userId) {
       p.barcode,
       p.image_url,
       p.calories_per_100g,
+      p.protein_per_100g,
+      p.fat_per_100g,
+      p.carbs_per_100g,
       pp.quantity,
       pp.expiration_date
     FROM pantry_product pp
