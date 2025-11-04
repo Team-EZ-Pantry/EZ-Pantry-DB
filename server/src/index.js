@@ -38,10 +38,8 @@ app.use('/api/auth', authRoutes);
 const pantryRoutes = require('./routes/pantry');
 app.use('/api/pantry', pantryRoutes);
 
-const profileRoutes = require('./routes/users');
-app.use('/api/users', profileRoutes);
-
-
+const userRoutes = require('./routes/user');
+app.use('/api/user', userRoutes);
 
 // Start the server
 async function startServer() {
