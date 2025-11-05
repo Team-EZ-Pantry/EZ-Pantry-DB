@@ -137,31 +137,69 @@ async function getMyCustomProducts(req, res) {
 // ******************************************************************
 // *             Modify a custom product's information              *
 // ******************************************************************
-/*async function modifyCustomProduct(req, res) {
+async function modifyCustomProduct(req, res) {
   try {
     const userId = req.user.userId;
     const { customProductId } = req.params;
     const updateData = req.body;
 
-    const updatedCustomProduct = await productModel.modifyCustomProduct(
+    // Validate that at least one field was provided
+    if (!updateData || Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: 'No fields provided for update' });
+    }
+
+    // Validate that product name was provided
+    if (!updateData.product_name || updateData.product_name.trim() === '') {
+      return res.status(400).json({ error: 'Product name cannot be empty' });
+    }
+
+    // Validate numeric fields if provided
+    const numericFields = ['calories_per_100g', 'protein_per_100g', 'carbs_per_100g', 'fat_per_100g'];
+    for (const field of numericFields) {
+      if (updateData[field] !== undefined && updateData[field] !== null) {
+        const value = parseFloat(updateData[field]); // Convert to number
+        if (isNaN(value) || value < 0) {
+          return res.status(400).json({ 
+            error: `${field} must be a positive number` 
+          });
+        }
+        updateData[field] = value; 
+      }
+    }
+
+    const updatedProduct = await productModel.modifyCustomProduct(
       userId,
       customProductId,
       updateData
     );
 
-    res.status(200).json({ updatedCustomProduct });
+    if (!updatedProduct) {
+      return res.status(404).json({ error: 'Custom product not found' });
+    }
+
+    res.json({
+      message: 'Custom product updated successfully',
+      customProduct: updatedProduct
+    });
+
   } catch (error) {
     console.error('Modify custom product error:', error);
+
+    // Catch error from model when no valid fields to update 
+    // (shouldn't run because product name is validated above)
+    if (error.message === 'No valid fields to update') {
+      return res.status(400).json({ error: error.message });
+    }
+
     res.status(500).json({ error: 'Failed to modify custom product' });
   }
-}*/
-
+}
 
 module.exports = {
   searchProducts,
   getProductByBarcode,
   createCustomProduct,
-  deleteCustomProduct,
   getMyCustomProducts,
-  //modifyCustomProduct
+  modifyCustomProduct,
+  deleteCustomProduct
 };

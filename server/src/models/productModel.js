@@ -135,7 +135,8 @@ async function getMyCustomProducts(userId) {
 // ******************************************************************
 // *             Modify a custom product's information              *
 // ******************************************************************
-/* async function modifyCustomProduct(userId, customProductId, updateData) {
+async function modifyCustomProduct(userId, customProductId, updateData) {
+  // Build dynamic UPDATE query based on what fields are provided
   const allowedFields = [
     'product_name',
     'brand',
@@ -151,7 +152,7 @@ async function getMyCustomProducts(userId) {
 
   const updates = [];
   const values = [];
-  let paramIndex = 1;
+  let paramIndex = 1; // Track parameter position for SQL query
 
   // Build SET clause dynamically
   for (const field of allowedFields) {
@@ -167,20 +168,20 @@ async function getMyCustomProducts(userId) {
     throw new Error('No valid fields to update');
   }
 
-  // Add WHERE clause parameters
-  values.push(customProductId);  // $paramIndex
-  values.push(userId);           // $paramIndex+1
+  // Add WHERE clause parameters ['New name', ..., customProductId, userId]
+  values.push(customProductId);  // at paramIndex
+  values.push(userId);           // at paramIndex+1
 
   const query = `
     UPDATE custom_product
     SET ${updates.join(', ')}
-    WHERE custom_product_id = $${paramIndex} AND user_id = $${paramIndex + 1}
+    WHERE custom_product_id = $${paramIndex} AND user_id = $${paramIndex+1}
     RETURNING *
   `;
 
   const result = await pool.query(query, values);
   return result.rows[0];
-}*/
+}
 
 // ******************************************************************
 // *           Permanently delete a user's custom product           *
@@ -200,6 +201,6 @@ module.exports = {
   createCustomProduct,
   deleteCustomProduct,
   getMyCustomProducts,
-  //modifyCustomProduct
+  modifyCustomProduct,
   deleteCustomProduct
 };

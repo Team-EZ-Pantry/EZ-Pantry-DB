@@ -8,17 +8,14 @@ const { validateCustomProductAccess } = require('../middleware/validation');
 // *         Product Endpoints         *
 // *************************************
 // Regular products
+// Future feature: Search include's user's custom products (and then maybe shared custom products, and then maybe a public catalogue)
 router.get('/search', authenticateToken, productController.searchProducts);
 router.get('/barcode/:barcode', authenticateToken, productController.getProductByBarcode);
 
 // Custom products
-// Future feature: Search and get all users' custom products (public catalog)
-// router.get('/custom/search', authenticateToiken, productController.searchCustomProducts);
 router.post('/custom', authenticateToken, productController.createCustomProduct);
 router.get('/custom', authenticateToken, productController.getMyCustomProducts); // Will eventually get shared custom products too
+router.patch('/custom/:customProductId', authenticateToken, validateCustomProductAccess, productController.modifyCustomProduct);
 router.delete('/custom/:customProductId', authenticateToken, validateCustomProductAccess, productController.deleteCustomProduct);
-
-// Coming very soon
-//router.patch('/custom/:customProductId', authenticateToken, validateCustomProductAccess, productController.modifyCustomProduct);
 
 module.exports = router;
