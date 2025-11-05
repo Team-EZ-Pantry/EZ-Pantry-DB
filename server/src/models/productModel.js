@@ -25,9 +25,7 @@ async function searchProducts(query, limit = 10) {
   return result.rows;
 }
 
-// **************************************************
-// * Find product by barcode (for barcode scanning) *
-// **************************************************
+// Find product by exact barcode (for barcode scanning)
 async function findByBarcode(barcode) {
   const result = await pool.query(
     'SELECT * FROM product WHERE barcode = $1',

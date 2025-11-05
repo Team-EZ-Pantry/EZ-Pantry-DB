@@ -9,7 +9,11 @@
   - [Authentication Endpoints](#authentication-endpoints)
     - [Register](#register)
     - [Login](#login)
-    - [Me](#me)
+  - [User Endpoints](#user-endpoints)
+    - [Get User](#get-user)
+    - [Update Username](#update-username)
+    - [Update Password](#update-password)
+    - [Delete User](#delete-user)
   - [Pantry Endpoints](#pantry-endpoints)
     - [Create Pantry](#create-pantry)
     - [Delete Pantry](#delete-pantry)
@@ -22,11 +26,17 @@
     - [Update Product Quantity](#update-product-quantity)
     - [Update Product Expiration Date](#update-product-expiration-date)
   - [Product Endpoints](#product-endpoints)
-    - [Search Products](#search-products)
-    - [Get Product by Barcode](#get-product-by-barcode)
-    - [Create Custom Product](#create-custom-product)
-    - [Get Custom Products](#get-custom-products)
-    - [Delete Custom Product](#delete-custom-product)
+    - [Search Products 🔒](#search-products)
+    - [Get Product by Barcode 🔒](#get-product-by-barcode)
+    - [Get Product by ID 🔒](#get-product-by-id)
+  - [Shopping List Endpoints](#shopping-list-endpoints)
+    - [Get all shopping lists](#get-all-shopping-lists)
+    - [Create a shopping list](#create-shopping-list)
+    - [Get a shopping list](#get-shopping-list)
+    - [Delete a shopping list](#delete-shopping-list)
+    - [Add item to shopping list](#add-item-to-shopping-list)
+    - [Remove item from shopping list](#remove-item-from-shopping-list)
+    - [Toggle item checked status](#toggle-item-checked-status)
 
 ## EZ Pantry Features
 
@@ -274,12 +284,12 @@ Login with an email and password to receive a JWT.
 | `401` | Unauthorized |
 | `500` | Internal server error |
 
----
+## User Endpoints
 
-### Me
-**GET** `/api/auth/me`
+### Get User
+**GET** `/api/user/me`
 
-Protected route - Get the current user's information.
+Get the current user's information.
 
 #### Request Body 
 None
@@ -294,13 +304,9 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "User data retrieved successfully",
-    "user": {
-        "user_id": 1,
-        "username": "testman",
-        "email": "test@gmail.com",
-        "createdAt": "2025-10-07T02:40:01.450Z"
-    }
+    "username": "Andrew",
+    "email": "test@gmail.com",
+    "createdAt": "2025-10-16T01:21:38.491Z"
 }
 ```
 
@@ -1177,7 +1183,7 @@ Authorization: Bearer user.token.here
             "barcode": "987654321",
             "image_url": null,
             "calories_per_100g": 30
-        
+        }
     ]
 }
 ```
