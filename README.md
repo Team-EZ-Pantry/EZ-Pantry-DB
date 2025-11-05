@@ -9,7 +9,11 @@
   - [Authentication Endpoints](#authentication-endpoints)
     - [Register](#register)
     - [Login](#login)
-    - [Me 🔒](#me)
+  - [User Endpoints](#user-endpoints)
+    - [Get User](#get-user)
+    - [Update Username](#update-username)
+    - [Update Password](#update-password)
+    - [Delete User](#delete-user)
   - [Pantry Endpoints](#pantry-endpoints)
     - [Create Pantry 🔒](#create-pantry)
     - [Delete Pantry 🔒](#delete-pantry)
@@ -275,10 +279,12 @@ Login with an email and password to receive a JWT.
 | `401` | Unauthorized |
 | `500` | Internal server error |
 
-### Me
-**GET** `/api/auth/me`
+## User Endpoints
 
-Protected route - Get the current user's information.
+### Get User
+**GET** `/api/user/me`
+
+Get the current user's information.
 
 #### Request Body 
 None
@@ -293,13 +299,9 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "User data retrieved successfully",
-    "user": {
-        "user_id": 1,
-        "username": "testman",
-        "email": "test@gmail.com",
-        "createdAt": "2025-10-07T02:40:01.450Z"
-    }
+    "username": "Andrew",
+    "email": "test@gmail.com",
+    "createdAt": "2025-10-16T01:21:38.491Z"
 }
 ```
 
