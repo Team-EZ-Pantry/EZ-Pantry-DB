@@ -30,7 +30,7 @@ CREATE TABLE pantry_product (
     pantry_id INT REFERENCES pantry(pantry_id) ON DELETE CASCADE,
     product_id INT REFERENCES product(product_id) ON DELETE CASCADE,
     custom_product_id INT REFERENCES custom_product(custom_product_id) ON DELETE CASCADE,
-    quantity INT DEFAULT 0,
+    quantity INT,
     expiration_date DATE,
     PRIMARY KEY (pantry_id, product_id),
     CONSTRAINT check_product_or_custom CHECK (
