@@ -101,22 +101,6 @@ async function createCustomProduct(req, res) {
     res.status(500).json({ error: 'Failed to create custom product' });
   }
 }
-// ******************************************************************
-// *           Permanently delete a user's custom product           *
-// ******************************************************************
-async function deleteCustomProduct(req, res) {
-  try {
-    const userId = req.user.userId;
-    const { customProductId } = req.params;
-
-    const deletedCustomProduct = await productModel.deleteCustomProduct(userId, customProductId);
-
-    res.status(200).json({ deletedCustomProduct });
-  } catch (error) {
-    console.error('Delete custom product error:', error);
-    res.status(500).json({ error: 'Failed to delete custom product' });
-  }
-}
 
 // ******************************************************************
 // * Get all custom products associated with the authenticated user *
@@ -192,6 +176,24 @@ async function modifyCustomProduct(req, res) {
     }
 
     res.status(500).json({ error: 'Failed to modify custom product' });
+  }
+}
+
+
+// ******************************************************************
+// *           Permanently delete a user's custom product           *
+// ******************************************************************
+async function deleteCustomProduct(req, res) {
+  try {
+    const userId = req.user.userId;
+    const { customProductId } = req.params;
+
+    const deletedCustomProduct = await productModel.deleteCustomProduct(userId, customProductId);
+
+    res.status(200).json({ deletedCustomProduct });
+  } catch (error) {
+    console.error('Delete custom product error:', error);
+    res.status(500).json({ error: 'Failed to delete custom product' });
   }
 }
 

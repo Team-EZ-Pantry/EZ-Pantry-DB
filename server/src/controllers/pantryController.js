@@ -20,37 +20,10 @@ async function createPantry(req, res) {
 
     const newPantry = await pantryModel.createPantry(userId, name);
 
-    res.status(201).json({
-      message: 'Pantry created successfully',
-      pantry: newPantry
-    });
+    res.status(201).json({pantry: newPantry});
   } catch (error) {
     console.error('Create pantry error:', error);
     res.status(500).json({ error: 'Failed to create pantry' });
-  }
-}
-
-// *************************************
-// *         Delete a Pantry           *
-// *************************************
-async function deletePantry(req, res) {
-  try {
-    const { pantryId } = req.params;
-    const userId = req.user.userId;
-
-    const deletedPantry = await pantryModel.deletePantry(pantryId, userId);
-
-    if (!deletedPantry) {
-      return res.status(404).json({ error: 'Pantry not found' });
-    }
-
-    res.json({
-      message: 'Pantry deleted successfully',
-      pantry: deletedPantry
-    });
-  } catch (error) {
-    console.error('Delete pantry error:', error);
-    res.status(500).json({ error: 'Failed to delete pantry' });
   }
 }
 
@@ -62,10 +35,7 @@ async function getAllPantriesForUser(req, res) {
     const userId = req.user.userId; // From authenticated token
     const pantries = await pantryModel.getPantriesByUserId(userId);
     
-    res.json({
-      message: 'Pantries retrieved successfully',
-      pantries
-    });
+    res.json({pantries});
   } catch (error) {
     console.error('Get pantries error:', error);
     res.status(500).json({ error: 'Failed to retrieve pantries' });
@@ -86,10 +56,7 @@ async function getPantry(req, res) {
       return res.status(404).json({ error: 'Pantry not found' });
     }
 
-    res.json({
-      message: 'Pantry retrieved successfully',
-      pantry: pantryWithProducts
-    });
+    res.json({pantry: pantryWithProducts});
   } catch (error) {
     console.error('Get pantry error:', error);
     res.status(500).json({ error: 'Failed to retrieve pantry' });
@@ -115,6 +82,30 @@ async function updatePantryName(req, res) {
   } catch (error) {
     console.error('Update pantry name error:', error);
     res.status(500).json({ error: 'Failed to update pantry name' });
+  }
+}
+
+// *************************************
+// *         Delete a Pantry           *
+// *************************************
+async function deletePantry(req, res) {
+  try {
+    const { pantryId } = req.params;
+    const userId = req.user.userId;
+
+    const deletedPantry = await pantryModel.deletePantry(pantryId, userId);
+
+    if (!deletedPantry) {
+      return res.status(404).json({ error: 'Pantry not found' });
+    }
+
+    res.json({
+      message: 'Pantry deleted successfully',
+      pantry: deletedPantry
+    });
+  } catch (error) {
+    console.error('Delete pantry error:', error);
+    res.status(500).json({ error: 'Failed to delete pantry' });
   }
 }
 
@@ -148,6 +139,9 @@ async function addProduct(req, res) {
       product: result
     });
   } catch (error) {
+    if (error.code === '23503') { // foreign key violation
+      return res.status(404).json({ error: 'Invalid product ID' });
+    }
     console.error('Add product error:', error);
     res.status(500).json({ error: 'Failed to add product to pantry' });
   }
@@ -174,6 +168,9 @@ async function removeProduct(req, res) {
       product: result
     });
   } catch (error) {
+    if (error.code === '23503') { // foreign key violation
+      return res.status(404).json({ error: 'Invalid product ID' });
+    }
     console.error('Remove product error:', error);
     res.status(500).json({ error: 'Failed to remove product from pantry' });
   }
@@ -369,10 +366,10 @@ async function updateCustomProductExpiration(req, res) {
 
 module.exports = {
   createPantry,
-  deletePantry,
   getAllPantriesForUser,
   getPantry,
   updatePantryName,
+  deletePantry,
   // Pantry Product Controllers
   addProduct,
   removeProduct,

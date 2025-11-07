@@ -16,27 +16,30 @@
     - [Delete User](#delete-user)
   - [Pantry Endpoints](#pantry-endpoints)
     - [Create Pantry](#create-pantry)
-    - [Delete Pantry](#delete-pantry)
     - [Get All Pantries for a User](#get-all-pantries-for-a-user)
     - [Get Pantry](#get-pantry)
     - [Update Pantry Name](#update-pantry-name)
-  - [Regular and Custom Product Endpoints](#regular-and-custom-products)
+    - [Delete Pantry](#delete-pantry)
+  - [Regular and Custom Pantry Product Endpoints](#regular-and-custom-products)
     - [Add Product to Pantry](#add-product-to-pantry)
     - [Remove Product from Pantry](#remove-product-from-pantry)
     - [Update Product Quantity](#update-product-quantity)
     - [Update Product Expiration Date](#update-product-expiration-date)
   - [Product Endpoints](#product-endpoints)
-    - [Search Products 🔒](#search-products)
-    - [Get Product by Barcode 🔒](#get-product-by-barcode)
-    - [Get Product by ID 🔒](#get-product-by-id)
+    - [Search Products](#search-products)
+    - [Get Product by Barcode](#get-product-by-barcode)
+    - [Create Custom Product](#create-custom-product)
+    - [Get Custom Products](#get-custom-products)
+    - [Modify Custom Product](#modify-custom-product)
+    - [Delete Custom Product](#delete-custom-product)
   - [Shopping List Endpoints](#shopping-list-endpoints)
-    - [Get all shopping lists](#get-all-shopping-lists)
-    - [Create a shopping list](#create-shopping-list)
-    - [Get a shopping list](#get-shopping-list)
-    - [Delete a shopping list](#delete-shopping-list)
-    - [Add item to shopping list](#add-item-to-shopping-list)
-    - [Remove item from shopping list](#remove-item-from-shopping-list)
-    - [Toggle item checked status](#toggle-item-checked-status)
+    - [Get all Shopping Lists](#get-all-shopping-lists)
+    - [Create a Shopping List](#create-shopping-list)
+    - [Get a Shopping List](#get-shopping-list)
+    - [Delete a Shopping List](#delete-shopping-list)
+    - [Add Item to shopping list](#add-item-to-shopping-list)
+    - [Remove Item from shopping list](#remove-item-from-shopping-list)
+    - [Toggle Item checked status](#toggle-item-checked-status)
 
 ## EZ Pantry Features
 
@@ -48,6 +51,7 @@
 ✅ Custom products associated with a user \
 ✅ Create and save shopping lists \
 ✅ Barcode scanning \
+*Product categorization* \
 *Shared custom product database * \
 *Pantry/shopping list sharing between users* \
 *LLM recipe generation + custom recipes + saving recipes*
@@ -97,6 +101,13 @@ Example:
 ```
 curl -X GET http://localhost:3000/api/auth/me \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+Authenication verifies if the JWT is valid and if the account exists
+```json
+{
+    "error": "Account no longer exists"
+}
 ```
 
 ### Health Check
@@ -356,6 +367,277 @@ Authorization: Bearer user.token.here
 
 ---
 
+### Update Username
+**PATCH** `/api/user/username`
+
+Update the current user's username.
+
+#### Request Body 
+```json
+{
+    "username": "New Username"
+}
+```
+
+| Field | Type | Required |
+|-------|------|----------|
+| `username` | string | Yes |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Username updated successfully",
+    "user": {
+        "user_id": 2,
+        "username": "New username",
+        "email": "test@gmail.com"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Username is required"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "User not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+  "error": "Failed to update username"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Updated username sucessfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | User not found |
+| `500` | Internal server error |
+
+---
+
+### Update Password
+**PATCH** `/api/user/password`
+
+Update the current user's password. Current and new password required.
+
+#### Request Body 
+```json
+{
+    "password" : "password123",
+    "newPassword" : "password1234"
+}
+```
+
+| Field | Type | Required |
+|-------|------|----------|
+| `password` | string | Yes |
+| `newPassword` | string | Yes |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "message": "Password updated successfully",
+    "user": {
+        "user_id": 2,
+        "username": "New Username",
+        "email": "test@gmail.com"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Current and new password are required"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "New password must be different from the old password"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Current password incorrect"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "User not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+  "error": "Failed to update password"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Updated username sucessfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | User not found |
+| `500` | Internal server error |
+
+---
+
+### Delete User
+**DELETE** `/api/user/me`
+
+Delete the current user. Password required.
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "message": "User deleted successfully",
+    "deletedUser": {
+        "user_id": 2,
+        "username": "New username",
+        "email": "test@gmail.com",
+        "created_at": "2025-10-16T01:21:38.491Z"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Password is incorrect"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "User not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+  "error": "Failed to delete user"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Delete user successful |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | User not found |
+| `500` | Internal server error |
+
+---
+
 ## Pantry Endpoints
 
 ### Create Pantry
@@ -437,88 +719,6 @@ Authorization: Bearer user.token.here
 | `400` | Invalid input (missing pantry name) |
 | `401` | No token |
 | `403` | Bad or expired token |
-| `500` | Internal server error |
-
----
-
-### Delete Pantry
-**DELETE** `/api/pantry/:pantryid`
-
-Delete a pantry by ID
-
-*Delete the pantry with ID = 20:*
-```
-http://localhost:3000/api/pantry/20
-```
-
-#### Request Body 
-None
-
-#### Request Header
-```
-Authorization: Bearer user.token.here
-```
-
-#### Success Response
-**Code:** `200 OK`
-
-```json
-{
-    "message": "Pantry deleted successfully",
-    "pantry": {
-        "pantry_id": 11,
-        "user_id": 1,
-        "name": "New Pantry",
-        "is_default": false,
-        "created_at": "2025-10-15T21:05:10.431Z"
-    }
-}
-```
-
-#### Error Responses
-
-<details>
-<summary>Click to view all error codes</summary>
-
-
-
-**Code:** `401 Unauthorized`
-```json
-{
-    "error": "Access denied. No token provided"
-}
-```
-
-**Code:** `403 Forbidden`
-```json
-{
-    "error": "Invalid or expired token"
-}
-```
-
-**Code:** `404 Not Found`
-```json
-{
-    "error": "Pantry not found"
-}
-```
-
-**Code** `500 Internal Server Error`
-```json
-{
-    "error": "Failed to delete pantry"
-}
-```
-
-</details>
-
-#### Status Codes
-| Code | Description |
-|------|-------------|
-| `200` | Pantry deleted successfully  |
-| `401` | No token |
-| `403` | Bad or expired token |
-| `404` | Pantry ID not found |
 | `500` | Internal server error |
 
 ---
@@ -617,22 +817,35 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "Pantry retrieved successfully",
     "pantry": {
-        "pantry_id": 13,
-        "user_id": 2,
-        "name": "New",
+        "pantry_id": 17,
+        "user_id": 4,
+        "name": "pantry",
         "is_default": false,
-        "created_at": "2025-10-16T01:22:09.581Z",
+        "created_at": "2025-11-07T02:41:17.481Z",
         "products": [
             {
-                "product_id": 1,
-                "product_name": "Natural Concord Grape Spread",
-                "brand": "Welch's Concord",
-                "barcode": "0123456789",
+                "id": 8,
+                "product_type": "custom_product",
+                "product_name": "Another custom Product",
+                "brand": "Test Brand",
                 "image_url": null,
+                "categories": [],
+                "allergens": [],
                 "calories_per_100g": null,
                 "quantity": 3,
+                "expiration_date": null
+            },
+            {
+                "id": 1,
+                "product_type": "product",
+                "product_name": "Natural Concord Grape Spread",
+                "brand": "Welch's Concord",
+                "image_url": null,
+                "categories": [],
+                "allergens": [],
+                "calories_per_100g": null,
+                "quantity": 1,
                 "expiration_date": null
             }
         ]
@@ -771,7 +984,89 @@ Authorization: Bearer user.token.here
 
 ---
 
-## Regular and Custom Products
+### Delete Pantry
+**DELETE** `/api/pantry/:pantryid`
+
+Delete a pantry by ID
+
+*Delete the pantry with ID = 20:*
+```
+http://localhost:3000/api/pantry/20
+```
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Pantry deleted successfully",
+    "pantry": {
+        "pantry_id": 11,
+        "user_id": 1,
+        "name": "New Pantry",
+        "is_default": false,
+        "created_at": "2025-10-15T21:05:10.431Z"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Pantry not found"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to delete pantry"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Pantry deleted successfully  |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Pantry ID not found |
+| `500` | Internal server error |
+
+---
+
+## Regular and Custom Pantry Product Endpoints
 Regular and custom product functionality is identical. Simply substitute **`custom-products`** for `products` in the API URL, e.g.:
 ```/api/pantry/:pantryid/custom-products/:productId```
 

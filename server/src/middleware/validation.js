@@ -13,7 +13,7 @@ async function validateCustomProductAccess(req, res, next) {
     // Verify custom product ownership
     const ownsProduct = await productModel.verifyCustomProductOwnership(customProductId, userId);
     if (!ownsProduct) {
-      return res.status(404).json({ error: 'Custom product not found' });
+      return res.status(404).json({ error: 'Custom product not found or access denied' });
     }
 
     next();
@@ -34,7 +34,7 @@ async function validatePantryAccess(req, res, next) {
 
     const ownsPantry = await pantryModel.verifyPantryOwnership(pantryId, userId);
     if (!ownsPantry) {
-      return res.status(404).json({ error: 'Pantry not found' });
+      return res.status(404).json({ error: 'Pantry not found or access denied' });
     }
 
     next();
