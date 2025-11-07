@@ -19,6 +19,7 @@ async function getMe(req, res) {
     }
 
     res.json({
+      user_id: user.user_id,
       username: user.username,
       email: user.email,
       createdAt: user.created_at
@@ -56,9 +57,8 @@ async function updateUsername(req, res) {
 
     // Return user info
     res.json({
-      username: updatedUser.username,
-      email: updatedUser.email,
-      createdAt: updatedUser.created_at
+      message: 'Username updated successfully',
+      user: updatedUser
     });
   } catch (error) {
     console.error('Update username error:', error);
@@ -108,13 +108,16 @@ async function updatePassword(req, res) {
 
     // Update password
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
-    const updated = await userModel.updatePassword(userId, newPasswordHash);
+    const updatedUser = await userModel.updatePassword(userId, newPasswordHash);
 
-    if(!updated) {
+    if(!updatedUser) {
       return res.status(500).json({error: 'Failed to update password'});
     }
 
-    return res.status(200).json({message: 'Password updated successfully'});
+    res.json({
+      message: 'Password updated successfully',
+      user: updatedUser
+    });
   } catch (error) {
     console.error('Password update error:', error);
     return res.status(500).json({error: 'Failed to update password'});

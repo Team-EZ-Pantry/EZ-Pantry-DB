@@ -8,8 +8,8 @@ function validateUsername(username) {
   if (trimmed.length > 30) {
     errors.push('Username must be 30 characters or less');
   }
-  if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
-    errors.push('Username can only contain letters, numbers, underscores, or hyphens');
+  if (!/^[a-zA-Z0-9_ -]+$/.test(trimmed)) {
+    errors.push('Username can only contain letters, numbers, underscores, hyphens, or spaces');
   }
   
   return {

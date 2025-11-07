@@ -60,10 +60,11 @@ async function updatePassword(userId, newPasswordHash) {
   const result = await pool.query(
     `UPDATE app_user
      SET password_hash = $1
-     WHERE user_id = $2`,
+     WHERE user_id = $2
+     RETURNING user_id, username, email`,
     [newPasswordHash, userId]
   );
-  return result.rowCount > 0;
+  return result.rows[0];
 }
 
 // Delete user from database
