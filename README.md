@@ -33,13 +33,13 @@
     - [Modify Custom Product](#modify-custom-product)
     - [Delete Custom Product](#delete-custom-product)
   - [Shopping List Endpoints](#shopping-list-endpoints)
+    - [Create Shopping List](#create-shopping-list)
     - [Get all Shopping Lists](#get-all-shopping-lists)
-    - [Create a Shopping List](#create-shopping-list)
-    - [Get a Shopping List](#get-shopping-list)
-    - [Delete a Shopping List](#delete-shopping-list)
-    - [Add Item to shopping list](#add-item-to-shopping-list)
-    - [Remove Item from shopping list](#remove-item-from-shopping-list)
-    - [Toggle Item checked status](#toggle-item-checked-status)
+    - [Get Shopping List](#get-shopping-list)
+    - [Delete Shopping List](#delete-shopping-list)
+    - [Add Item to Shopping List](#add-item-to-shopping-list)
+    - [Remove Item from Shopping List](#remove-item-from-shopping-list)
+    - [Toggle Item Checked Status](#toggle-item-checked-status)
 
 ## EZ Pantry Features
 
@@ -1850,4 +1850,578 @@ Authorization: Bearer user.token.here
 
 ---
 
+### Create Shopping List
+**POST** `/api/shopping-list`
+
+Create a new shopping list for the authenticated user.
+
+#### Request Body 
+```json
+{
+    "name": "Weekly Groceries"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Name of the shopping list |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `201 Created`
+
+```json
+{
+    "list_id": 3,
+    "user_id": 1,
+    "name": "Weekly Groceries",
+    "created_at": "2025-11-07T10:30:00.000Z"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Shopping list name is required"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to create shopping list"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `201` | Shopping list created successfully |
+| `400` | Invalid input (missing name) |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `500` | Internal server error |
+
+---
+
 ### Get all Shopping Lists
+**GET** `/api/shopping-list`
+
+Get all shopping lists for the authenticated user.
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+[
+    {
+        "list_id": 1,
+        "user_id": 1,
+        "name": "Weekly Groceries",
+        "created_at": "2025-11-01T10:00:00.000Z",
+        "items": [
+            {
+                "item_id": 1,
+                "product_id": 5,
+                "product_name": "Milk",
+                "brand": "Dairy Farm",
+                "quantity": 2,
+                "is_checked": false
+            },
+            {
+                "item_id": 2,
+                "product_id": 10,
+                "product_name": "Bread",
+                "brand": "Bakery Fresh",
+                "quantity": 1,
+                "is_checked": true
+            }
+        ]
+    },
+    {
+        "list_id": 2,
+        "user_id": 1,
+        "name": "Party Supplies",
+        "created_at": "2025-11-05T14:30:00.000Z",
+        "items": []
+    }
+]
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to retrieve shopping lists"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Shopping lists retrieved successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `500` | Internal server error |
+
+---
+
+### Get Shopping List
+**GET** `/api/shopping-list/:listId`
+
+Get a specific shopping list by ID with all its items.
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "list_id": 1,
+    "user_id": 1,
+    "name": "Weekly Groceries",
+    "created_at": "2025-11-01T10:00:00.000Z",
+    "items": [
+        {
+            "item_id": 1,
+            "product_id": 5,
+            "product_name": "Milk",
+            "brand": "Dairy Farm",
+            "image_url": null,
+            "quantity": 2,
+            "is_checked": false
+        },
+        {
+            "item_id": 2,
+            "product_id": 10,
+            "product_name": "Bread",
+            "brand": "Bakery Fresh",
+            "image_url": null,
+            "quantity": 1,
+            "is_checked": true
+        }
+    ]
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Shopping list not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to retrieve shopping list"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Shopping list retrieved successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Shopping list not found |
+| `500` | Internal server error |
+
+---
+
+### Delete Shopping List
+**DELETE** `/api/shopping-list/:listId`
+
+Delete a shopping list by ID. This also deletes all associated items.
+
+*Delete the shopping list with ID = 3:*
+```
+http://localhost:3000/api/shopping-list/3
+```
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Shopping list deleted successfully"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Shopping list not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to delete shopping list"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Shopping list deleted successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Shopping list not found |
+| `500` | Internal server error |
+
+---
+
+### Add Item to Shopping List
+**PUT** `/api/shopping-list/:listId`
+
+Add a product to a shopping list with a specified quantity.
+
+#### Request Body
+```json
+{
+    "productId": 5,
+    "quantity": 2
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `productId` | number | Yes | ID of the product to add |
+| `quantity` | number | Yes | Quantity of the product |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `201 Created`
+
+```json
+{
+    "item_id": 5,
+    "list_id": 1,
+    "product_id": 5,
+    "quantity": 2,
+    "is_checked": false,
+    "added_at": "2025-11-07T12:00:00.000Z"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Product ID and quantity are required"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Shopping list not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to add item to shopping list"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `201` | Item added successfully |
+| `400` | Invalid input (missing productId or quantity) |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Shopping list not found |
+| `500` | Internal server error |
+
+---
+
+### Remove Item from Shopping List
+**DELETE** `/api/shopping-list/:listId/items/:itemId`
+
+Remove a specific item from a shopping list.
+
+*Remove item with ID = 5 from list with ID = 1:*
+```
+http://localhost:3000/api/shopping-list/1/items/5
+```
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Item removed from shopping list successfully"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Item not found in shopping list"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to remove item from shopping list"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Item removed successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Item not found in shopping list |
+| `500` | Internal server error |
+
+---
+
+### Toggle Item Checked Status
+**PATCH** `/api/shopping-list/:listId/items/:itemId`
+
+Toggle the checked/unchecked status of an item in a shopping list.
+
+*Toggle item with ID = 5 in list with ID = 1:*
+```
+http://localhost:3000/api/shopping-list/1/items/5
+```
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "item_id": 5,
+    "list_id": 1,
+    "product_id": 5,
+    "quantity": 2,
+    "is_checked": true,
+    "added_at": "2025-11-07T12:00:00.000Z"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Item not found in shopping list"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to toggle item checked status"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Item status toggled successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Item not found in shopping list |
+| `500` | Internal server error |
+
+---
+
