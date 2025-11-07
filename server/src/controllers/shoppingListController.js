@@ -4,20 +4,6 @@
 
 const shoppingListModel = require('../models/shoppingListModel');
 
-// ********************************************
-// *   Get all of the user's shopping lists   *
-// ********************************************
-async function getAllShoppingLists(req, res) {
-  try {
-    const userId = req.user.userId;
-    const shoppingLists = await shoppingListModel.getAllShoppingLists(userId);
-    res.json(shoppingLists);
-  } catch (error) {
-    console.error('Get all shopping lists error:', error);
-    res.status(500).json({ error: 'Failed to retrieve shopping lists' });
-  }
-}
-
 // *************************************
 // *       Create a shopping list      *
 // *************************************
@@ -30,6 +16,20 @@ async function createShoppingList(req, res) {
   } catch (error) {
     console.error('Create shopping list error:', error);
     res.status(500).json({ error: 'Failed to create shopping list' });
+  }
+}
+
+// ********************************************
+// *   Get all of the user's shopping lists   *
+// ********************************************
+async function getAllShoppingLists(req, res) {
+  try {
+    const userId = req.user.userId;
+    const shoppingLists = await shoppingListModel.getAllShoppingLists(userId);
+    res.json(shoppingLists);
+  } catch (error) {
+    console.error('Get all shopping lists error:', error);
+    res.status(500).json({ error: 'Failed to retrieve shopping lists' });
   }
 }
 

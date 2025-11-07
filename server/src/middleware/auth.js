@@ -4,8 +4,7 @@ const { findUserById } = require('../models/userModel');
 // *************************************
 // *         Authenticate JWT          *
 // *************************************
-/*
- * Authentication Middleware
+/* Authentication Middleware
  * 
  * This middleware protects routes that require a logged-in user.
  * It runs before the controller and checks if the request has a valid JWT token.
@@ -51,7 +50,6 @@ async function authenticateToken(req, res, next) {
     }
 
     // Step 7: Call next() to continue to the next middleware/controller
-    // Without this, the request stops here
     next();
 
   } catch (err) {

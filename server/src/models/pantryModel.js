@@ -1,12 +1,10 @@
 // *************************************
-// *    Pantry Management Functions    *
+// *         Pantry Functions          *
 // *************************************
 
 const pool = require('../config/database');
 
-// ***********************************
-// Verify a pantry belongs to a user *
-// ***********************************
+// Verify a pantry belongs to a user
 async function verifyPantryOwnership(pantryId, userId) {
   const result = await pool.query(
     'SELECT pantry_id FROM pantry WHERE pantry_id = $1 AND user_id = $2',
@@ -15,9 +13,16 @@ async function verifyPantryOwnership(pantryId, userId) {
   return result.rows.length > 0;
 }
 
-// **************************************
-// Get all pantries for a specific user *
-// **************************************
+// Create a new pantry associated with a user
+async function createPantry(userId, name) {
+  const result = await pool.query(
+    'INSERT INTO pantry (user_id, name) VALUES ($1, $2) RETURNING *',
+    [userId, name]
+  );
+  return result.rows[0];
+}
+
+// Get all pantries for a specific user
 async function getPantriesByUserId(userId) {
   const result = await pool.query(
     'SELECT * FROM pantry WHERE user_id = $1 ORDER BY created_at DESC',
@@ -26,9 +31,7 @@ async function getPantriesByUserId(userId) {
   return result.rows;
 }
 
-// *****************************************
-// Get a specific pantry with its products *
-// *****************************************
+// Get a pantry with its products
 async function getPantryWithProducts(pantryId, userId) {
   // Verify pantry belongs to user
   const pantry = await pool.query(
@@ -40,9 +43,7 @@ async function getPantryWithProducts(pantryId, userId) {
     return null; // Pantry not found or doesn't belong to user
   }
 
-  // *********************************
-  // Get all products in this pantry *
-  // *********************************
+  // List all products in this pantry
   const products = await pool.query(
     `SELECT 
       COALESCE(p.product_id, cp.custom_product_id) AS id,
@@ -72,44 +73,20 @@ async function getPantryWithProducts(pantryId, userId) {
   };
 }
 
-// ********************************************
-// Create a new pantry associated with a user *
-// ********************************************
-async function createPantry(userId, name) {
-  const result = await pool.query(
-    'INSERT INTO pantry (user_id, name) VALUES ($1, $2) RETURNING *',
-    [userId, name]
-  );
-  return result.rows[0];
-}
-
-// ********************
-// Update pantry name *
-// ********************
-async function updatePantry(pantryId, userId, name) {
-  const result = await pool.query(
-    'UPDATE pantry SET name = $1 WHERE pantry_id = $2 AND user_id = $3 RETURNING *',
-    [name, pantryId, userId]
-  );
-  return result.rows[0];
-}
-
-// *******************
-// * Delete a pantry *
-// *******************
-async function deletePantry(pantryId, userId) {
-  const result = await pool.query(
-    'DELETE FROM pantry WHERE pantry_id = $1 AND user_id = $2 RETURNING *',
-    [pantryId, userId]
-  );
-  return result.rows[0];
-}
-
 // Update a pantry's name
 async function updatePantryName(pantryId, userId, name) {
   const result = await pool.query(
     'UPDATE pantry SET name = $1 WHERE pantry_id = $2 AND user_id = $3 RETURNING *',
     [name, pantryId, userId]
+  );
+  return result.rows[0];
+}
+
+// Delete a pantry
+async function deletePantry(pantryId, userId) {
+  const result = await pool.query(
+    'DELETE FROM pantry WHERE pantry_id = $1 AND user_id = $2 RETURNING *',
+    [pantryId, userId]
   );
   return result.rows[0];
 }
@@ -225,9 +202,8 @@ module.exports = {
   getPantriesByUserId,
   getPantryWithProducts,
   createPantry,
-  updatePantry,
-  deletePantry,
   updatePantryName,
+  deletePantry,
   // Pantry Product management
   addProductToPantry,
   removeProductFromPantry,

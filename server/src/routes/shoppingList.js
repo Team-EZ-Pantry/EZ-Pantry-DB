@@ -7,16 +7,14 @@ const { authenticateToken } = require('../middleware/auth');
 // *         Shopping List Endpoints          *
 // ********************************************
 
-// User's shopping lists
-router.get('/', authenticateToken, shoppingListController.getAllShoppingLists);
+// Shopping list endpoints
 router.post('/', authenticateToken, shoppingListController.createShoppingList);
+router.get('/', authenticateToken, shoppingListController.getAllShoppingLists);
 router.get('/:listId', authenticateToken, shoppingListController.getShoppingList);
 router.delete('/:listId', authenticateToken, shoppingListController.deleteShoppingList);
 
-// Toggle checked status of an item.
-// When every item on the list is checked, server should mark list as complete (?)
+// Shopping list item endpoints
 router.patch('/:listId/items/:itemId', authenticateToken, shoppingListController.toggleItemChecked);
-
 router.put('/:listId', authenticateToken, shoppingListController.addShoppingListItem);
 router.delete('/:listId/items/:itemId', authenticateToken, shoppingListController.removeShoppingListItem);
 

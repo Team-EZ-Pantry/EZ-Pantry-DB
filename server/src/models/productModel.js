@@ -4,9 +4,7 @@
 
 const pool = require('../config/database');
 
-// *******************************************
-// * Search products by name (partial match) *
-// *******************************************
+// Search products by name (partial match)
 async function searchProducts(query, limit = 10) {
   const result = await pool.query(
     `SELECT 
@@ -34,10 +32,8 @@ async function findByBarcode(barcode) {
   return result.rows[0];
 }
 
-// ************************************************
-// * Verify a user has access to a custom product *
-// ************************************************
-async function verifyCustomProductOwnership(customProductId, userId) {
+// Verify a user has access to a custom product
+async function verifyCustomProductAccess(customProductId, userId) {
   const result = await pool.query(
     'SELECT custom_product_id FROM custom_product WHERE custom_product_id = $1 AND user_id = $2',
     [customProductId, userId]
@@ -45,9 +41,7 @@ async function verifyCustomProductOwnership(customProductId, userId) {
   return result.rows.length > 0;
 }
 
-// **************************************************
-// * Create a custom product associated with a user *
-// **************************************************
+// Create a custom product associated with a user
 async function createCustomProduct(userId, productData) {
   const {
     barcode,
@@ -80,9 +74,7 @@ async function createCustomProduct(userId, productData) {
   return result.rows[0];
 }
 
-// **************************************************
-// *             Delete a custom product            *
-// **************************************************
+// Delete a custom product
 async function deleteCustomProduct(userId, customProductId) {
   const result = await pool.query(
     'DELETE FROM custom_product WHERE user_id = $1 AND custom_product_id = $2 RETURNING *',
@@ -91,9 +83,7 @@ async function deleteCustomProduct(userId, customProductId) {
   return result.rows[0];
 }
 
-// ***************************************
-// * Get all of a user's custom products *
-// ***************************************
+// Get all of a user's custom products and their pantry locations
 async function getMyCustomProducts(userId) {
   const result = await pool.query(
     `SELECT 
@@ -130,9 +120,7 @@ async function getMyCustomProducts(userId) {
   return result.rows;
 }
 
-// ******************************************************************
-// *             Modify a custom product's information              *
-// ******************************************************************
+// Modify a custom product's information. Partial updates allowed.
 async function modifyCustomProduct(userId, customProductId, updateData) {
   // Build dynamic UPDATE query based on what fields are provided
   const allowedFields = [
@@ -181,9 +169,7 @@ async function modifyCustomProduct(userId, customProductId, updateData) {
   return result.rows[0];
 }
 
-// ******************************************************************
-// *           Permanently delete a user's custom product           *
-// ******************************************************************
+// Permanently delete a user's custom product
 async function deleteCustomProduct(userId, customProductId) {
   const result = await pool.query(
     'DELETE FROM custom_product WHERE user_id = $1 AND custom_product_id = $2 RETURNING *',
@@ -195,7 +181,7 @@ async function deleteCustomProduct(userId, customProductId) {
 module.exports = {
   searchProducts,
   findByBarcode,
-  verifyCustomProductOwnership,
+  verifyCustomProductAccess,
   createCustomProduct,
   deleteCustomProduct,
   getMyCustomProducts,

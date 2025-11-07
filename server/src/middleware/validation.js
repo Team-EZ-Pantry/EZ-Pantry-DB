@@ -11,7 +11,7 @@ async function validateCustomProductAccess(req, res, next) {
     const userId = req.user.userId;
 
     // Verify custom product ownership
-    const ownsProduct = await productModel.verifyCustomProductOwnership(customProductId, userId);
+    const ownsProduct = await productModel.verifyCustomProductAccess(customProductId, userId);
     if (!ownsProduct) {
       return res.status(404).json({ error: 'Custom product not found or access denied' });
     }

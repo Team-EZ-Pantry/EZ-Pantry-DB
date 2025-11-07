@@ -1847,3 +1847,7 @@ Authorization: Bearer user.token.here
 | `403` | Bad or expired token |
 | `404` | Custom Product not found |
 | `500` | Internal server error |
+
+---
+
+### Get all Shopping Lists

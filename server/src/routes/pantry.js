@@ -9,10 +9,10 @@ const { validateCustomProductAccess, validatePantryAccess } = require('../middle
 // *************************************
 // Pantry management
 router.post('/', authenticateToken,                                      pantryController.createPantry);
-router.delete('/:pantryId', authenticateToken, validatePantryAccess,     pantryController.deletePantry);
 router.get('/', authenticateToken,                                       pantryController.getAllPantriesForUser);
 router.get('/:pantryId', authenticateToken, validatePantryAccess,        pantryController.getPantry);
 router.patch('/:pantryId/name', authenticateToken, validatePantryAccess, pantryController.updatePantryName);
+router.delete('/:pantryId', authenticateToken, validatePantryAccess,     pantryController.deletePantry);
 
 // Product management within pantries
 router.post('/:pantryId/products/:productId', authenticateToken, validatePantryAccess, pantryController.addProduct);
