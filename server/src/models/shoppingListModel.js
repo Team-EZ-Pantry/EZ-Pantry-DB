@@ -80,12 +80,12 @@ async function toggleItemChecked(listId, itemId) {
 
 
 // Add an item to a shopping list
-async function addShoppingListItem(listId, productId, quantity) {
+async function createAndAddShoppingListItem(listId, productId, customProductId, text, quantity) {
    const result = await pool.query(
-      `INSERT INTO shopping_list_item (list_id, product_id, quantity)
-       VALUES ($1, $2, $3)
+      `INSERT INTO shopping_list_item (list_id, product_id, custom_product_id, text, quantity)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [listId, productId, quantity]
+      [listId, productId, customProductId, text, quantity]
    );
    return result.rows[0];
 }
@@ -105,6 +105,6 @@ module.exports = {
   getShoppingList,
   deleteShoppingList,
   toggleItemChecked,
-  addShoppingListItem,
+  createAndAddShoppingListItem,
   removeShoppingListItem,
 };

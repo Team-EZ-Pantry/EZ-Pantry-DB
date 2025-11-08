@@ -37,7 +37,7 @@
     - [Get all Shopping Lists](#get-all-shopping-lists)
     - [Get Shopping List](#get-shopping-list)
     - [Delete Shopping List](#delete-shopping-list)
-    - [Add Item to Shopping List](#add-item-to-shopping-list)
+    - [Create and Add Item to Shopping List](#create-and-add-item-to-shopping-list)
     - [Remove Item from Shopping List](#remove-item-from-shopping-list)
     - [Toggle Item Checked Status](#toggle-item-checked-status)
 
@@ -1243,7 +1243,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Product Quantity
-**PUT** `/api/pantry/:pantryid/products/:productid/quantity`
+**POST** `/api/pantry/:pantryid/products/:productid/quantity`
 
 Update the quantity of a product in a pantry. (quantity <= 0 does not delete)
 
@@ -1341,7 +1341,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Product Expiration Date
-**PUT** `/api/pantry/:pantryid/products/:productid/expiration`
+**POST** `/api/pantry/:pantryid/products/:productid/expiration`
 
 Update the expiration date of a product in a pantry
 
@@ -2183,23 +2183,27 @@ Authorization: Bearer user.token.here
 
 ---
 
-### Add Item to Shopping List
-**PUT** `/api/shopping-list/:listId`
+### Create and Add Item to Shopping List
+**POST** `/api/shopping-list/:listId`
 
-Add a product to a shopping list with a specified quantity.
+Create and add an item, deliniated by a product, custom product, and/or some custom text to a shopping list. Quantity can be specified.
 
 #### Request Body
 ```json
 {
-    "productId": 5,
-    "quantity": 2
+    "productId": 555,
+    "text": "Bunch of milk"
 }
 ```
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `productId` | number | Yes | ID of the product to add |
-| `quantity` | number | Yes | Quantity of the product |
+| `productId` | number | Conditional* | ID of the product to add |
+| `customProductId` | number | Conditional* | ID of the custom product to add |
+| `text` | String | Conditional* | ID of the custom product to add |
+| `quantity` | number | No | Quantity of the product |
+
+**Note*: Must provide one of: `productId`, `customProductId`, or `text`. You can optionally combine `text` with either `productId` or `customProductId` to add a note to an item.
 
 #### Request Header
 ```
@@ -2211,12 +2215,15 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "item_id": 5,
+    "item_id": 4,
     "list_id": 1,
-    "product_id": 5,
-    "quantity": 2,
-    "is_checked": false,
-    "added_at": "2025-11-07T12:00:00.000Z"
+    "product_id": 555,
+    "custom_product_id": null,
+    "text": "Bunch of milk",
+    "quantity": null,
+    "checked": false,
+    "created_at": "2025-11-08T04:15:03.572Z",
+    "updated_at": "2025-11-08T04:15:03.572Z"
 }
 ```
 

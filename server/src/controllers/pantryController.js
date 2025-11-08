@@ -30,7 +30,7 @@ async function createPantry(req, res) {
 // *************************************
 // *    Get all Pantries for a User    *
 // *************************************
-async function getAllPantriesForUser(req, res) {
+async function getAllPantries(req, res) {
   try {
     const userId = req.user.userId; // From authenticated token
     const pantries = await pantryModel.getPantriesByUserId(userId);
@@ -51,7 +51,6 @@ async function getPantry(req, res) {
     const userId = req.user.userId;
 
     const pantryWithProducts = await pantryModel.getPantryWithProducts(pantryId, userId);
-    
     if (!pantryWithProducts) {
       return res.status(404).json({ error: 'Pantry not found' });
     }
@@ -140,7 +139,7 @@ async function addProduct(req, res) {
     });
   } catch (error) {
     if (error.code === '23503') { // foreign key violation
-      return res.status(404).json({ error: 'Invalid product ID' });
+      return res.status(404).json({ error: 'Product ID does not exist' });
     }
     console.error('Add product error:', error);
     res.status(500).json({ error: 'Failed to add product to pantry' });
@@ -256,7 +255,7 @@ async function addCustomProduct(req, res) {
     const { pantryId, customProductId } = req.params;
     const { quantity, expirationDate } = req.body;
 
-    if (!quantity || quantity <= 0) {
+    if (!quantity || quantity < 1) {
       return res.status(400).json({ error: 'Quantity must be greater than 0' });
     }
 
@@ -366,7 +365,7 @@ async function updateCustomProductExpiration(req, res) {
 
 module.exports = {
   createPantry,
-  getAllPantriesForUser,
+  getAllPantries,
   getPantry,
   updatePantryName,
   deletePantry,

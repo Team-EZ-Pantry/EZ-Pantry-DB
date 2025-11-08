@@ -14,8 +14,8 @@ router.get('/:listId', authenticateToken, shoppingListController.getShoppingList
 router.delete('/:listId', authenticateToken, shoppingListController.deleteShoppingList);
 
 // Shopping list item endpoints
-router.patch('/:listId/items/:itemId', authenticateToken, shoppingListController.toggleItemChecked);
-router.put('/:listId', authenticateToken, shoppingListController.addShoppingListItem);
+router.post('/:listId/items/', authenticateToken, shoppingListController.createAndAddShoppingListItem);
+router.patch('/:listId/items/:itemId/toggle', authenticateToken, shoppingListController.toggleItemChecked);
 router.delete('/:listId/items/:itemId', authenticateToken, shoppingListController.removeShoppingListItem);
 
 module.exports = router;

@@ -42,7 +42,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/pantry', pantryRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/shopping-lists', shoppingListRoutes);
+app.use('/api/shopping-list', shoppingListRoutes);
 
 // *************************************
 // *         Start the Server         *

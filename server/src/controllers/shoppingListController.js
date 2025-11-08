@@ -40,6 +40,7 @@ async function getShoppingList(req, res) {
   try {
     const userId = req.user.userId;
     const { listId } = req.params;
+
     const shoppingList = await shoppingListModel.getShoppingList(listId);
     if (!shoppingList) {
       return res.status(404).json({ error: 'Shopping list not found' });
@@ -57,7 +58,8 @@ async function getShoppingList(req, res) {
 async function deleteShoppingList(req, res) {   // make sure you also delete all associated items
   try {
     const userId = req.user.userId;
-    const { listId } = req.params; 
+    const { listId } = req.params;
+    
     const deleted = await shoppingListModel.deleteShoppingList(userId, listId);
     if (!deleted) {
       return res.status(404).json({ error: 'Shopping list not found' });
@@ -66,6 +68,80 @@ async function deleteShoppingList(req, res) {   // make sure you also delete all
   } catch (error) {
     console.error('Delete shopping list error:', error);
     res.status(500).json({ error: 'Failed to delete shopping list' });
+  }
+}
+
+// ***************************************
+// * Create an item and add it to a list *
+// ***************************************
+async function createAndAddShoppingListItem(req, res) {
+  try {
+     const { listId } = req.params;
+     const { productId, customProductId, text, quantity } = req.body;
+    
+    // Validate: can't have both productId and customProductId
+    if (productId && customProductId) {
+      return res.status(400).json({ 
+        error: 'Cannot provide both productId and customProductId' 
+      });
+    }
+
+    // Validate: must provide at least one of productId, customProductId, or text
+    if(!productId && !customProductId && !text) {
+      return  res.status(400).json({ error: 'Must provide productId, customProductId, or text to add an item' });
+    }
+    
+    // Optional: Validate quantity if provided
+    if (quantity !== undefined && (quantity < 1)) {
+      return res.status(400).json({ 
+        error: 'Quantity must be at least 1' 
+      });
+    }
+
+    // If text-only item, ensure it's not empty
+    if (!productId && !customProductId && text) {
+    if (text.trim() === '') {
+      return res.status(400).json({ 
+        error: 'Text cannot be empty' 
+      });
+    }
+  }
+
+    // Custom product validation block to be added later (pantry sharing sprint)
+    /*
+    // Validate custom product exists AND user owns it (if provided)
+    if (customProductId) {
+      const customProduct = await productModel.getCustomProductById(customProductId);
+      
+      if (!customProduct) {
+        return res.status(404).json({ 
+          error: 'Custom product not found' 
+        });
+      }
+
+      // Check ownership (user must own the custom product)
+      if (customProduct.user_id !== userId) {
+        return res.status(403).json({ 
+          error: 'You do not have access to this custom product' 
+        });
+      }
+    */
+
+    const newItem = await shoppingListModel.createAndAddShoppingListItem(
+      listId, 
+      productId || null,
+      customProductId || null,
+      text || null,
+      quantity
+    );
+
+    res.status(201).json(newItem);
+  } catch (error) {
+    if (error.code === '23503') { // foreign key violation
+      return res.status(404).json({ error: 'Product ID does not exist' });
+    }
+    console.error('Add shopping list item error:', error);
+    res.status(500).json({ error: 'Failed to add item to shopping list' });
   }
 }
 
@@ -84,22 +160,6 @@ async function toggleItemChecked(req, res) {
     console.error('Toggle item checked error:', error);
     res.status(500).json({ error: 'Failed to toggle item checked status' });
   }
-}
-
-// *************************************
-// *       Add an item to a list       *
-// *************************************
-async function addShoppingListItem(req, res) {
-   try {
-      const { listId } = req.params;
-      const { productId } = req.body;
-      const { quantity } = req.body;
-      const newItem = await shoppingListModel.addShoppingListItem(listId, productId, quantity);
-      res.status(201).json(newItem);
-   } catch (error) {
-      console.error('Add shopping list item error:', error);
-      res.status(500).json({ error: 'Failed to add item to shopping list' });
-   }
 }
 
 // *************************************
@@ -124,7 +184,7 @@ module.exports = {
   createShoppingList,
   getShoppingList,
   deleteShoppingList,
+  createAndAddShoppingListItem,
   toggleItemChecked,
-  addShoppingListItem,
-  removeShoppingListItem,
+  removeShoppingListItem
 };
