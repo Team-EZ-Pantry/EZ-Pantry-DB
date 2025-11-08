@@ -21,3 +21,6 @@ logs/
 *.log
 coverage/
 package-lock.json
+
+# Requests
+requests/

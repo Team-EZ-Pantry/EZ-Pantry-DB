@@ -1,10 +1,10 @@
 const { verifyToken } = require('../utils/jwt');
+const { findUserById } = require('../models/userModel');
 
 // *************************************
 // *         Authenticate JWT          *
 // *************************************
-/*
- * Authentication Middleware
+/* Authentication Middleware
  * 
  * This middleware protects routes that require a logged-in user.
  * It runs before the controller and checks if the request has a valid JWT token.
@@ -17,7 +17,7 @@ const { verifyToken } = require('../utils/jwt');
  * 3. If valid: add user info to req.user and call next()
  * 4. If invalid: return error and DON'T call next() (controller never runs)
  */
-function authenticateToken(req, res, next) {
+async function authenticateToken(req, res, next) {
   try {
     // Step 1: Get the Authorization header
     // Format: "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -37,16 +37,19 @@ function authenticateToken(req, res, next) {
     }
 
     // Step 4: Verify the token
-    // This calls verifyToken() from utils/jwt.js
-    // If token is invalid or expired, this throws an error
     const decoded = verifyToken(token);
 
     // Step 5: Token is valid, add user info to request object
     // decoded contains: { userId, email, iat, exp }
     req.user = decoded;
 
-    // Step 6: Call next() to continue to the next middleware/controller
-    // Without this, the request stops here
+    // Step 6: Determine the user still exists
+    const user = await findUserById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ error: 'Account no longer exists' });
+    }
+
+    // Step 7: Call next() to continue to the next middleware/controller
     next();
 
   } catch (err) {
