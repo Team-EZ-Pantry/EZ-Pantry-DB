@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX unique_lower_email ON app_user (LOWER(email));
