@@ -1243,7 +1243,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Product Quantity
-**POST** `/api/pantry/:pantryid/products/:productid/quantity`
+**PATCH PATCH PATCH PATCH PATCH PATCH** `/api/pantry/:pantryid/products/:productid/quantity`
 
 Update the quantity of a product in a pantry. (quantity <= 0 does not delete)
 
