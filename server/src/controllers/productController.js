@@ -8,10 +8,11 @@ const productModel = require('../models/productModel');
 // *         Regular Products          *
 // *************************************
 
-// *******************************************
-// * Search products by name (partial match) *
-// *******************************************
+// ***************************************************************
+// * Search products and custom products by name (partial match) *
+// ***************************************************************
 // Query params: ?q=milk (required) and ?limit=10 (optional)
+// Returns unified format with product_type field
 async function searchProducts(req, res) {
   try {
     const { q, limit } = req.query;
@@ -26,11 +27,16 @@ async function searchProducts(req, res) {
 
     // Minimum 2 characters to prevent too many results
     if (q.length < 2) {
-      return res.json({ products: [] });
+      return res.json({ 
+        query: q,
+        count: 0,
+        products: [] 
+      });
     }
-
+    // Search both regular products and user's custom products
     const products = await productModel.searchProducts(
       q.trim(), 
+      userId,
       parseInt(limit) || 10
     );
 
@@ -42,11 +48,10 @@ async function searchProducts(req, res) {
 
   } catch (error) {
     console.error({
-        message: 'Product search error',
+        message: error.message,
         userId,
         query: q,
-        limit,
-        error: error.message
+        limit
       });
     res.status(500).json({ error: 'Failed to search products' });
   }

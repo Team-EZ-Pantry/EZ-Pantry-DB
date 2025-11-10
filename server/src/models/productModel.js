@@ -4,22 +4,44 @@
 
 const pool = require('../config/database');
 
-// Search products by name (partial match)
-async function searchProducts(query, limit = 10) {
+// Search both regular products and user's custom products
+async function searchProducts(query, userId, limit = 10) {
   const result = await pool.query(
-    `SELECT 
-      product_id,
+    `
+    SELECT 
+      product_id AS id,
+      'product' AS product_type,
       product_name,
       brand,
-      barcode,
       image_url,
+      barcode,
+      categories,
+      allergens,
       calories_per_100g
     FROM product
-    WHERE product_name ILIKE LOWER($1)
+    WHERE product_name ILIKE $1
+    
+    UNION ALL
+    
+    SELECT 
+      custom_product_id AS id,
+      'custom_product' AS product_type,
+      product_name,
+      brand,
+      image_url,
+      barcode,
+      categories,
+      allergens,
+      calories_per_100g
+    FROM custom_product
+    WHERE user_id = $2 AND product_name ILIKE $1
+    
     ORDER BY product_name ASC
-    LIMIT $2`,
-    [`%${query}%`, limit]
+    LIMIT $3
+    `,
+    [`%${query}%`, userId, limit]
   );
+  
   return result.rows;
 }
 

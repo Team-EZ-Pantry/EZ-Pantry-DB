@@ -1243,7 +1243,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Product Quantity
-**PATCH PATCH PATCH PATCH PATCH PATCH** `/api/pantry/:pantryid/products/:productid/quantity`
+**PATCH** `/api/pantry/:pantryid/products/:productid/quantity`
 
 Update the quantity of a product in a pantry. (quantity <= 0 does not delete)
 
@@ -1341,7 +1341,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Product Expiration Date
-**POST** `/api/pantry/:pantryid/products/:productid/expiration`
+**PATCH** `/api/pantry/:pantryid/products/:productid/expiration`
 
 Update the expiration date of a product in a pantry
 
@@ -1443,7 +1443,8 @@ Authorization: Bearer user.token.here
 ### Search Products
 **GET** `/api/products/search?q=milk&limit=10`
 
-Search for products by name with partial search (autocomplete) functionality.
+Search for products by name with partial search (autocomplete) functionality. 
+User's Custom products included in search.
 
 #### Query Parameters
 | Parameter | Type   | Required |Description                          |
@@ -1460,24 +1461,30 @@ Authorization: Bearer user.token.here
 **Code:** `200 OK`
 ```json
 {
-    "query": "milk",
+    "query": "gra",
     "count": 2,
     "products": [
         {
-            "product_id": 1,
-            "product_name": "Milk",
-            "brand": "Brand A",
-            "barcode": "123456789",
+            "id": 9,
+            "product_type": "custom_product",
+            "product_name": "Farmer's Market Grape Jelly",
+            "brand": null,
             "image_url": null,
-            "calories_per_100g": 42
+            "barcode": null,
+            "categories": [],
+            "allergens": [],
+            "calories_per_100g": null
         },
         {
-            "product_id": 2,
-            "product_name": "Almond Milk",
-            "brand": "Brand B",
-            "barcode": "987654321",
+            "id": 1,
+            "product_type": "product",
+            "product_name": "Natural Concord Grape Spread",
+            "brand": "Welch's Concord",
             "image_url": null,
-            "calories_per_100g": 30
+            "barcode": "0123456789",
+            "categories": [],
+            "allergens": [],
+            "calories_per_100g": null
         }
     ]
 }
