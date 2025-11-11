@@ -32,7 +32,7 @@ async function getPantriesByUserId(userId) {
 }
 
 // Get a pantry with its products
-async function getPantryWithProducts(pantryId, userId) {
+async function getPantryWithProducts(pantryId, userId, sortBy, category) {
   // Verify pantry belongs to user
   const pantry = await pool.query(
     'SELECT * FROM pantry WHERE pantry_id = $1 AND user_id = $2',
@@ -43,7 +43,38 @@ async function getPantryWithProducts(pantryId, userId) {
     return null; // Pantry not found or doesn't belong to user
   }
 
-  // List all products in this pantry
+  // Build ORDER BY clause based on sortBy parameter
+  let orderByClause;
+  switch (sortBy) {
+    case 'name_asc':
+      orderByClause = 'ORDER BY COALESCE(p.product_name, cp.product_name) ASC';
+      break;
+    case 'name_desc':
+      orderByClause = 'ORDER BY COALESCE(p.product_name, cp.product_name) DESC';
+      break;
+    case 'date_asc':
+      orderByClause = 'ORDER BY pp.added_at ASC';  // Oldest first
+      break;
+    case 'date_desc':
+      orderByClause = 'ORDER BY pp.added_at DESC';  // Newest first
+      break;
+    default:
+      orderByClause = 'ORDER BY COALESCE(p.product_name, cp.product_name) ASC';
+  }
+
+  // Build WHERE clause for category filter (future implementation)
+  // For now, just select all products
+  const categoryFilter = category 
+    ? `AND ($3 = ANY(COALESCE(p.categories, cp.categories)))`
+    : '';
+
+  // Query parameters
+  const queryParams = [pantryId];
+  if (category) {
+    queryParams.push(category);
+  }
+
+  // Get products with dynamic sorting
   const products = await pool.query(
     `SELECT 
       COALESCE(p.product_id, cp.custom_product_id) AS id,
@@ -58,13 +89,15 @@ async function getPantryWithProducts(pantryId, userId) {
       COALESCE(p.allergens, cp.allergens) AS allergens,
       COALESCE(p.calories_per_100g, cp.calories_per_100g) AS calories_per_100g,
       pp.quantity,
-      pp.expiration_date
+      pp.expiration_date,
+      pp.added_at
     FROM pantry_product pp
     LEFT JOIN product p ON pp.product_id = p.product_id
     LEFT JOIN custom_product cp ON pp.custom_product_id = cp.custom_product_id
     WHERE pp.pantry_id = $1
-    ORDER BY COALESCE(p.product_name, cp.product_name) ASC`,
-    [pantryId]
+    ${categoryFilter}
+    ${orderByClause}`,
+    queryParams
   );
 
   return {

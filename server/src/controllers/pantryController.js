@@ -45,17 +45,37 @@ async function getAllPantries(req, res) {
 // *************************************
 // *   Get a Pantry and its Products   *
 // *************************************
+// Query parameters (pantryId?sort=name_asc&category=spices)
+// sort: 'name_asc' | 'name_desc' | 'date_asc' | 'date_desc' (default: 'name_asc')
+// category: Filter by category (future implementation)
 async function getPantry(req, res) {
   try {
     const { pantryId } = req.params;
     const userId = req.user.userId;
+    const { sort, category } = req.query;
 
-    const pantryWithProducts = await pantryModel.getPantryWithProducts(pantryId, userId);
+    // Validate sort parameter
+    const validSorts = ['name_asc', 'name_desc', 'date_asc', 'date_desc'];
+    const sortBy = validSorts.includes(sort) ? sort : 'name_asc';
+
+    // Get pantry with products
+    const pantryWithProducts = await pantryModel.getPantryWithProducts(
+      pantryId, 
+      userId, 
+      sortBy,
+      category
+    );
     if (!pantryWithProducts) {
       return res.status(404).json({ error: 'Pantry not found' });
     }
 
-    res.json({pantry: pantryWithProducts});
+    res.json({
+      pantry: pantryWithProducts,
+      appliedFilters: {
+        sort: sortBy,
+        category: category || null
+      }
+    });
   } catch (error) {
     console.error('Get pantry error:', error);
     res.status(500).json({ error: 'Failed to retrieve pantry' });

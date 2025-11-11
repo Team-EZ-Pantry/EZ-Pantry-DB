@@ -800,9 +800,18 @@ Authorization: Bearer user.token.here
 ---
 
 ### Get Pantry
-**GET** `/api/pantry/:pantryid`
+**GET** `/api/pantry/:pantryid?sort=name_asc`
 
-Get a specific pantry by ID
+Get a specific pantry by ID. Pantry contents can be sorted by by name and date and filtered by category*. Sorting can be done for the entire pantry or within categories*.
+
+*coming soon
+#### Query Parameters
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `sort`    | String | No       | Sort products by:<br>- `name_asc`: Product name ascending (default)<br>- `name_desc`: Product name descending<br>- `date_asc`: Date added ascending (oldest first)<br>- `date_desc`: Date added descending (newest first) |
+| `category`| String | No       | Coming soon |
+
 
 #### Request Body 
 None
@@ -825,16 +834,17 @@ Authorization: Bearer user.token.here
         "created_at": "2025-11-07T02:41:17.481Z",
         "products": [
             {
-                "id": 8,
+                "id": 9,
                 "product_type": "custom_product",
-                "product_name": "Another custom Product",
-                "brand": "Test Brand",
+                "product_name": "Farmer's Market Grape Jelly",
+                "brand": null,
                 "image_url": null,
-                "categories": [],
-                "allergens": [],
+                "categories": null,
+                "allergens": null,
                 "calories_per_100g": null,
-                "quantity": 3,
-                "expiration_date": null
+                "quantity": 6,
+                "expiration_date": null,
+                "added_at": "2025-11-11T04:33:41.318Z"
             },
             {
                 "id": 1,
@@ -846,9 +856,14 @@ Authorization: Bearer user.token.here
                 "allergens": [],
                 "calories_per_100g": null,
                 "quantity": 1,
-                "expiration_date": null
+                "expiration_date": null,
+                "added_at": "2025-11-07T08:30:41.620Z"
             }
         ]
+    },
+    "appliedFilters": {
+        "sort": "name_asc",
+        "category": null
     }
 }
 ```
