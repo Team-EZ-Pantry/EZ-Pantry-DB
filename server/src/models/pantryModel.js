@@ -44,29 +44,21 @@ async function getPantryWithProducts(pantryId, userId, sortBy, category) {
   }
 
   // Build ORDER BY clause based on sortBy parameter
-  let orderByClause;
-  switch (sortBy) {
-    case 'name_asc':
-      orderByClause = 'ORDER BY COALESCE(p.product_name, cp.product_name) ASC';
-      break;
-    case 'name_desc':
-      orderByClause = 'ORDER BY COALESCE(p.product_name, cp.product_name) DESC';
-      break;
-    case 'date_asc':
-      orderByClause = 'ORDER BY pp.added_at ASC';  // Oldest first
-      break;
-    case 'date_desc':
-      orderByClause = 'ORDER BY pp.added_at DESC';  // Newest first
-      break;
-    default:
-      orderByClause = 'ORDER BY COALESCE(p.product_name, cp.product_name) ASC';
-  }
+  const sortOptions = {
+    'name_asc': 'ORDER BY COALESCE(p.product_name, cp.product_name) ASC',
+    'name_desc': 'ORDER BY COALESCE(p.product_name, cp.product_name) DESC', 
+    'date_asc': 'ORDER BY pp.added_at ASC',
+    'date_desc': 'ORDER BY pp.added_at DESC'
+  };
+  const orderByClause = sortOptions[sortBy] || sortOptions['name_asc'];
 
   // Build WHERE clause for category filter (future implementation)
   // For now, just select all products
   const categoryFilter = category 
     ? `AND ($3 = ANY(COALESCE(p.categories, cp.categories)))`
     : '';
+  
+  // Also, maybe add Pagination? and Caching?
 
   // Query parameters
   const queryParams = [pantryId];
