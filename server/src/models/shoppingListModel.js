@@ -81,12 +81,24 @@ async function toggleItemChecked(listId, itemId) {
 
 // Add an item to a shopping list
 async function createAndAddShoppingListItem(listId, productId, customProductId, text, quantity) {
-   const result = await pool.query(
-      `INSERT INTO shopping_list_item (list_id, product_id, custom_product_id, text, quantity)
-       VALUES ($1, $2, $3, $4, $5)
+  
+    const result = await pool.query(
+      `INSERT INTO shopping_list_item (list_id, product_id, text, quantity)
+       VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [listId, productId, customProductId, text, quantity]
+      [listId, productId, text, quantity]
    );
+  
+  /*
+  if(customProductId) {
+    const result = await pool.query(
+      `INSERT INTO shopping_list_item (list_id, custom_product_id, text, quantity)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *`,
+      [listId, customProductId, text, quantity]
+    );
+  }*/
+   
    return result.rows[0];
 }
 
