@@ -284,7 +284,7 @@ async function addCustomProduct(req, res) {
       null,              // No regular product ID
       customProductId,   // custom product ID
       quantity,
-      expirationDate
+      expirationDate || null
     );
 
     res.status(201).json({
