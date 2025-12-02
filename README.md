@@ -142,7 +142,7 @@ Check if the server is running.
 ### Register
 **POST** `/api/auth/register`
 
-Register a new user account in the database.
+Register a new user account in the database. Returns a token.
 
 #### Request Body (this will be secured by HTTPS)
 ```json
@@ -164,13 +164,14 @@ Register a new user account in the database.
 
 ```json
 {
-  "message": "User registered successfully",
-  "user": {
-    "id": 1,
-    "username": "testuser",
-    "email": "test@gmail.com",
-    "createdAt": "2025-10-01T02:36:43.602Z"
-  }
+    "message": "User registered successfully",
+    "user": {
+        "userId": 18,
+        "username": "Another user",
+        "email": "test@hotmail.com",
+        "createdAt": "2025-12-02T13:00:52.627Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE4LCJlbWFpbCI6InRlc3RAaG90bWFpbC5jb20iLCJpYXQiOjE3NjQ2NTg4NTIsImV4cCI6MTc2NzI1MDg1Mn0.wttXBYZLVQ63XR5VXWCzxGVUnvxdj1WAzf1G-f9tD5Y"
 }
 ```
 
