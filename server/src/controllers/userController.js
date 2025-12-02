@@ -19,10 +19,12 @@ async function getMe(req, res) {
     }
 
     res.json({
+      user: {
       user_id: user.user_id,
       username: user.username,
       email: user.email,
-      createdAt: user.created_at
+      created_at: user.created_at
+      }
     });
   } catch (error) {
     console.error('Get user profile error:', error);
@@ -38,28 +40,29 @@ async function updateUsername(req, res) {
     const userId = req.user.userId;
     const { username } = req.body;
 
-    // Validate input
     if (!username) {
       return res.status(400).json({ error: 'Username is required' });
     }
 
-    // Validate username
+    // Validate new username structure
     const usernameValidation = validateUsername(username);
     if (!usernameValidation.isValid) {
-      return res.status(400).json({ errors: usernameValidation.errors });
+      return res.status(400).json({ error: usernameValidation.error });
     }
 
-    const updatedUser = await userModel.updateUsername(userId, usernameValidation.cleaned);
-    
-    if (!updatedUser) {
+    // Fetch current username to compare
+    const currentUser = await userModel.findUserById(userId);
+    if (!currentUser) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Return user info
-    res.json({
-      message: 'Username updated successfully',
-      user: updatedUser
-    });
+    // Prevent same username update
+    if (currentUser.username === usernameValidation.cleaned) {
+      return res.status(400).json({ error: 'New username must be different' });
+    }
+
+    const updatedUser = await userModel.updateUsername(userId, usernameValidation.cleaned);
+    res.json({user: updatedUser});
   } catch (error) {
     console.error('Update username error:', error);
     res.status(500).json({ error: 'Failed to update username' });
@@ -74,7 +77,6 @@ async function updatePassword(req, res) {
     const userId = req.user.userId;
     const { password, newPassword } = req.body;
 
-    // Validate input
     if (!password || !newPassword) {
       return res.status(400).json({
         error: 'Current and new password are required'
@@ -88,10 +90,10 @@ async function updatePassword(req, res) {
       });
     }
 
-    // Validate new password
+    // Validate new password structure
     const passwordValidation = validatePassword(newPassword);
     if (!passwordValidation.isValid) {
-      return res.status(400).json({ errors: passwordValidation.errors });
+      return res.status(400).json({ error: passwordValidation.error });
     }
     
     // Fetch user to get current password hash
@@ -103,7 +105,7 @@ async function updatePassword(req, res) {
     // Verify current password
     const isValidCurrentPassword = await bcrypt.compare(password, user.password_hash);
     if (!isValidCurrentPassword) {
-      return res.status(401).json({ error: 'Current password incorrect' });
+      return res.status(400).json({ error: 'Current password is incorrect' });
     }
 
     // Update password
@@ -148,14 +150,15 @@ async function deleteMe(req, res) {
       });
     }
     
-    // Delete user from database
-    const deletedUser = await userModel.deleteUserById(userId);
-
-    return res.status(200).json({
-      message: 'User deleted successfully',
-      deletedUser: deletedUser
-    });
+    // Delete user from database and check if actually deleted
+    const deletedCount = await userModel.deleteUserById(userId);
+    if (deletedCount === 0) {
+      return res.status(404).json({ 
+        error: 'User not found or already deleted' 
+      });
+    }
     
+    return res.status(200).json({ message: 'User deleted successfully' });    
   } catch (error) {
     console.error('User delete error:', error);
     return res.status(500).json({ error: 'An error occurred while deleting the user'});

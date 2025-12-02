@@ -71,11 +71,10 @@ async function updatePassword(userId, newPasswordHash) {
 async function deleteUserById(userId) {
   const result = await pool.query(
     `DELETE FROM app_user 
-     WHERE user_id = $1 
-     RETURNING user_id, username, email, created_at`,
+     WHERE user_id = $1`,
     [userId]
   );
-  return result.rows[0];
+  return result.rowCount;
 }
 
 module.exports = {

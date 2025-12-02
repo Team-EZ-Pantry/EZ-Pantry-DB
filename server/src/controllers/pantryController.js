@@ -3,7 +3,6 @@
 // *************************************
 
 const pantryModel = require('../models/pantryModel');
-const productModel = require('../models/productModel');
 
 // *************************************
 // *       Create a New Pantry         *

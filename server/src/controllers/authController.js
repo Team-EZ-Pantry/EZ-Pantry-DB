@@ -24,26 +24,26 @@ async function register(req, res) {
     // Validate email
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
-      return res.status(400).json({ errors: emailValidation.errors });
+      return res.status(400).json({ error: emailValidation.error });
     }
 
     // Validate username
     const usernameValidation = validateUsername(username);
     if (!usernameValidation.isValid) {
-      return res.status(400).json({ errors: usernameValidation.errors });
+      return res.status(400).json({ error: usernameValidation.error });
     }
 
     // Validate password
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      return res.status(400).json({ errors: passwordValidation.errors });
+      return res.status(400).json({ error: passwordValidation.error });
     }
 
     // Check if user already exists
     const exists = await userModel.checkEmailExists(emailValidation.cleaned);
     if (exists) {
       return res.status(409).json({ 
-        error: 'A user with this email address already exists' 
+        error: 'An account with this email address already exists' 
       });
     }
 
@@ -53,6 +53,9 @@ async function register(req, res) {
     // Create user in database
     const newUser = await userModel.createUser(usernameValidation.cleaned, emailValidation.cleaned, passwordHash);
 
+    // Generate token for immediate login
+    const token = generateToken(newUser.user_id, newUser.email);
+
     // Send response
     res.status(201).json({
       message: 'User registered successfully',
@@ -61,7 +64,8 @@ async function register(req, res) {
         username: newUser.username,
         email: newUser.email,
         createdAt: newUser.created_at
-      }
+      },
+      token
     });
 
   } catch (err) {
@@ -94,14 +98,14 @@ async function login(req, res) {
   // Validate email
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {
-    return res.status(400).json({ errors: emailValidation.errors });
+    return res.status(400).json({ error: emailValidation.error });
   }
 
   // Find user by email if it exists
   const user = await userModel.findUserByEmail(emailValidation.cleaned);
   if (!user) {
     return res.status(401).json({ 
-      error: 'Invalid email or password' 
+      error: 'No account found with this email' 
     });
   }
 
@@ -109,7 +113,7 @@ async function login(req, res) {
   const isValidPassword = await bcrypt.compare(password, user.password_hash);
   if (!isValidPassword) {
     return res.status(401).json({ 
-      error: 'Invalid email or password' 
+      error: 'Incorrect password' 
     });
   }
 

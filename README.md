@@ -271,10 +271,17 @@ Login with an email and password to receive a JWT.
 }
 ```
 
-**Code:** `401 Unauthorized` (When either email or password is missing)
+**Code:** `401 Unauthorized`
 ```json
 {
-    "error": "Invalid email or password"
+    "error": "No account found with this email"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Incorrect password"
 }
 ```
 
@@ -315,9 +322,12 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "username": "Andrew",
-    "email": "test@gmail.com",
-    "createdAt": "2025-10-16T01:21:38.491Z"
+    "user": {
+        "user_id": 4,
+        "username": "New username again",
+        "email": "testing@hotmail.com",
+        "created_at": "2025-11-07T02:39:32.058Z"
+    }
 }
 ```
 
@@ -393,11 +403,10 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "Username updated successfully",
     "user": {
-        "user_id": 2,
-        "username": "New username",
-        "email": "test@gmail.com"
+        "user_id": 4,
+        "username": "Test",
+        "email": "testing@hotmail.com"
     }
 }
 ```
@@ -411,6 +420,13 @@ Authorization: Bearer user.token.here
 ```json
 {
     "error": "Username is required"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Username may contain letters, numbers, spaces, periods, apostrophes, underscores, and hyphens"
 }
 ```
 
@@ -448,6 +464,8 @@ Authorization: Bearer user.token.here
 | Code | Description |
 |------|-------------|
 | `200` | Updated username sucessfully |
+| `400` | No username provided |
+| `400` | Username format is invalid |
 | `401` | No token |
 | `403` | Bad or expired token |
 | `404` | User not found |
@@ -506,14 +524,21 @@ Authorization: Bearer user.token.here
 **Code:** `400 Bad Request`
 ```json
 {
+    "error": "Password must be at least 6 characters long"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
     "error": "New password must be different from the old password"
 }
 ```
 
-**Code:** `401 Unauthorized`
+**Code:** `400 Unauthorized`
 ```json
 {
-    "error": "Current password incorrect"
+    "error": "Current password is incorrect"
 }
 ```
 
@@ -550,7 +575,9 @@ Authorization: Bearer user.token.here
 #### Status Codes
 | Code | Description |
 |------|-------------|
-| `200` | Updated username sucessfully |
+| `200` | Updated password sucessfully |
+| `400` | Current and new password required |
+| `400` | Must be at least 6 characters |
 | `401` | No token |
 | `403` | Bad or expired token |
 | `404` | User not found |
@@ -575,13 +602,7 @@ Authorization: Bearer user.token.here
 **Code:** `200 OK`
 ```json
 {
-    "message": "User deleted successfully",
-    "deletedUser": {
-        "user_id": 2,
-        "username": "New username",
-        "email": "test@gmail.com",
-        "created_at": "2025-10-16T01:21:38.491Z"
-    }
+    "message": "User deleted successfully"
 }
 ```
 
