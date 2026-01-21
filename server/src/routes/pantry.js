@@ -12,6 +12,7 @@ router.post('/', authenticateToken,                                      pantryC
 router.get('/', authenticateToken,                                       pantryController.getAllPantries);
 router.get('/:pantryId', authenticateToken, validatePantryAccess,        pantryController.getPantry);
 router.patch('/:pantryId/name', authenticateToken, validatePantryAccess, pantryController.updatePantryName);
+router.patch('/:pantryId/last-visited', authenticateToken, validatePantryAccess, pantryController.updatePantryLastVisited);
 router.delete('/:pantryId', authenticateToken, validatePantryAccess,     pantryController.deletePantry);
 
 // Product management within pantries

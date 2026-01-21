@@ -81,6 +81,23 @@ async function getPantry(req, res) {
   }
 }
 
+// **********************************************************
+// *     h8Update the Last Visited timestamp of a Pantry    *
+// **********************************************************
+async function updatePantryLastVisited(req, res) {
+  try {
+    const { pantryId } = req.params;
+    const userId = req.user.userId;
+
+    const result = await pantryModel.updatePantryLastVisited(pantryId, userId);
+
+    res.json({ message: 'Pantry last visited timestamp updated', pantry: result });
+  } catch (error) {
+    console.error('Update pantry last visited error:', error);
+    res.status(500).json({ error: 'Failed to update pantry last visited timestamp' });
+  }
+}
+
 // *************************************
 // *      Update A Pantry's Name       *
 // *************************************
@@ -387,6 +404,7 @@ module.exports = {
   getAllPantries,
   getPantry,
   updatePantryName,
+  updatePantryLastVisited,
   deletePantry,
   // Pantry Product Controllers
   addProduct,

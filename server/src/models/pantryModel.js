@@ -107,6 +107,14 @@ async function updatePantryName(pantryId, userId, name) {
   return result.rows[0];
 }
 
+async function updatePantryLastVisited(pantryId, userId) {
+  const result = await pool.query(
+    'UPDATE pantry SET last_visited = CURRENT_TIMESTAMP WHERE pantry_id = $1 AND user_id = $2 RETURNING last_visited',
+    [pantryId, userId]
+  );
+  return result.rows[0];
+}
+
 // Delete a pantry
 async function deletePantry(pantryId, userId) {
   const result = await pool.query(
@@ -228,6 +236,7 @@ module.exports = {
   getPantryWithProducts,
   createPantry,
   updatePantryName,
+  updatePantryLastVisited,
   deletePantry,
   // Pantry Product management
   addProductToPantry,

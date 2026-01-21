@@ -19,6 +19,7 @@
     - [Get All Pantries for a User](#get-all-pantries-for-a-user)
     - [Get Pantry](#get-pantry)
     - [Update Pantry Name](#update-pantry-name)
+    - [Update Pantry Last Visited Timestamp](#update-pantry-last-visited-timestamp)
     - [Delete Pantry](#delete-pantry)
   - [Regular and Custom Pantry Product Endpoints](#regular-and-custom-products)
     - [Add Product to Pantry](#add-product-to-pantry)
@@ -1014,6 +1015,77 @@ Authorization: Bearer user.token.here
 |------|-------------|
 | `200` | Pantry name updated  |
 | `401` | Name not provided |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Pantry not found |
+| `500` | Internal server error |
+
+---
+
+### Update Pantry Last Visited Timestamp
+**PATCH** `/api/pantry/:pantryid/last-visited`
+
+Update the last visited timestamp of a pantry to the current time. To be called whenever a user opens a pantry.
+
+#### Request Body 
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Pantry last visited timestamp updated",
+    "pantry": {
+        "last_visited": "2026-01-22T04:07:26.058Z"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Bad Request`
+```json
+{
+    "error": "Pantry not found"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to update pantry last visited timestamp"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Pantry timestamp updated  |
 | `401` | No token |
 | `403` | Bad or expired token |
 | `404` | Pantry not found |
