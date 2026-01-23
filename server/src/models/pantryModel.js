@@ -25,7 +25,7 @@ async function createPantry(userId, name) {
 // Get all pantries for a specific user
 async function getPantriesByUserId(userId) {
   const result = await pool.query(
-    'SELECT * FROM pantry WHERE user_id = $1 ORDER BY created_at DESC',
+    'SELECT * FROM pantry WHERE user_id = $1 ORDER BY last_visited DESC',
     [userId]
   );
   return result.rows;
