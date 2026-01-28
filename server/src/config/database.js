@@ -2,11 +2,11 @@ const { Pool } = require('pg');
 
 // We use a simple configuration that works with DigitalOcean's default setup
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    // This allows the self-signed cert from DigitalOcean to pass
-    rejectUnauthorized: false 
-  }
+  user: process.env.DATABASE_USER,
+  host: process.env.DATABASE_HOST,
+  database: process.env.DATABASE,
+  password: process.env.DATABASE_PASSWORD,
+  port: process.env.DATABASE_PORT,
 });
 
 module.exports = pool;
