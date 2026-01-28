@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+/*const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -13,6 +13,18 @@ const pool = new Pool({
         // For local development, usually no SSL or skip validation
         rejectUnauthorized: false 
       }
+}); 
+
+module.exports = pool; */
+
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    // This ignores the 'self-signed certificate' error
+    rejectUnauthorized: false 
+  }
 });
 
 module.exports = pool;
