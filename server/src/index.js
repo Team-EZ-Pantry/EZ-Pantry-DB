@@ -1,17 +1,8 @@
 const path = require('path');
-// 1. Only use dotenv for local development
-if (process.env.NODE_ENV !== 'production') {
-    const path = require('path');
-    require('dotenv').config({
-        path: path.join(__dirname, '../.env')
-    });
-}
-
-// 2. Add a 'fail-safe' check to see what's happening
-if (!process.env.DATABASE_URL) {
-    console.error("FATAL ERROR: DATABASE_URL is not set in environment variables.");
-    // In production, we want to know why it's failing before it crashes
-}
+require('dotenv').config({
+  override: true,
+  path: path.join(__dirname, '../.env')
+});
 
 // *************************************
 // *      Server Configuration         *

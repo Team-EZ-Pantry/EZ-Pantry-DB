@@ -1,12 +1,18 @@
 const { Pool } = require('pg');
 
-// We use a simple configuration that works with DigitalOcean's default setup
+// Create and export a single database pool instance
 const pool = new Pool({
-  user: process.env.DATABASE_USER,
-  host: process.env.DATABASE_HOST,
-  database: process.env.DATABASE,
-  password: process.env.DATABASE_PASSWORD,
-  port: process.env.DATABASE_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+  // add more pool settings later
+});
+
+// Log connection errors
+pool.on('error', (err) => {
+  console.error('Unexpected database error:', err);
 });
 
 module.exports = pool;
