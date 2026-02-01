@@ -9,6 +9,12 @@ const { authenticateToken } = require('../middleware/auth');
 router.get('/me', authenticateToken, userController.getMe);
 router.patch('/username', authenticateToken, userController.updateUsername);
 router.patch('/password', authenticateToken, userController.updatePassword);
-router.delete('/me', authenticateToken, userController.deleteMe); 
+router.delete('/me', authenticateToken, userController.deleteMe);
+
+// *************************************
+// *     Theme Preferences Endpoints   *
+// *************************************
+router.get('/theme', authenticateToken, userController.getThemePreferences);
+router.patch('/theme', authenticateToken, userController.updateThemePreferences);
 
 module.exports = router;

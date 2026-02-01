@@ -70,11 +70,44 @@ async function updatePassword(userId, newPasswordHash) {
 // Delete user from database
 async function deleteUserById(userId) {
   const result = await pool.query(
-    `DELETE FROM app_user 
+    `DELETE FROM app_user
      WHERE user_id = $1`,
     [userId]
   );
   return result.rowCount;
+}
+
+// Get user theme preferences
+async function getThemePreferences(userId) {
+  const result = await pool.query(
+    `SELECT theme_mode, accent_color FROM app_user WHERE user_id = $1`,
+    [userId]
+  );
+  if (result.rows.length === 0) {
+    return null;
+  }
+  return {
+    themeMode: result.rows[0].theme_mode,
+    accentColor: result.rows[0].accent_color
+  };
+}
+
+// Update user theme preferences
+async function updateThemePreferences(userId, themeMode, accentColor) {
+  const result = await pool.query(
+    `UPDATE app_user
+     SET theme_mode = $1, accent_color = $2
+     WHERE user_id = $3
+     RETURNING user_id, theme_mode, accent_color`,
+    [themeMode, accentColor, userId]
+  );
+  if (result.rows.length === 0) {
+    return null;
+  }
+  return {
+    themeMode: result.rows[0].theme_mode,
+    accentColor: result.rows[0].accent_color
+  };
 }
 
 module.exports = {
@@ -84,5 +117,7 @@ module.exports = {
   findUserByEmail,
   updateUsername,
   updatePassword,
-  deleteUserById
+  deleteUserById,
+  getThemePreferences,
+  updateThemePreferences
 };
