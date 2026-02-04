@@ -1,5 +1,6 @@
 const pantryModel = require('../models/pantryModel');
 const productModel = require('../models/productModel');
+const recipeModel = require('../models/recipeModel');
 
 // ***************************************************************
 // *      Validate user owns both pantry and custom product      *
@@ -44,7 +45,29 @@ async function validatePantryAccess(req, res, next) {
   }
 }
 
+// ***************************************************************
+// *                  Validate user owns recipe                  *
+// * For routes that operate on a recipe or its sub-resources    *
+// ***************************************************************
+async function validateRecipeAccess(req, res, next) {
+  try {
+    const { recipeId } = req.params;
+    const userId = req.user.userId;
+
+    const ownsRecipe = await recipeModel.verifyRecipeOwnership(recipeId, userId);
+    if (!ownsRecipe) {
+      return res.status(404).json({ error: 'Recipe not found or access denied' });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Recipe access validation error:', error);
+    res.status(500).json({ error: 'Recipe access validation failed' });
+  }
+}
+
 module.exports = {
   validateCustomProductAccess,
-  validatePantryAccess
+  validatePantryAccess,
+  validateRecipeAccess
 };

@@ -37,12 +37,14 @@ const userRoutes = require('./routes/user');
 const pantryRoutes = require('./routes/pantry');
 const productRoutes = require('./routes/product');
 const shoppingListRoutes = require('./routes/shoppingList');
+const recipeRoutes = require('./routes/recipe');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/pantry', pantryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/shopping-list', shoppingListRoutes);
+app.use('/api/recipes', recipeRoutes);
 
 // *************************************
 // *         Start the Server         *
