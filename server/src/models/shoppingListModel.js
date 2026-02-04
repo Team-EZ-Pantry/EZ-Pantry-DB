@@ -5,10 +5,10 @@
 const pool = require('../config/database');
 
 // Create a new shopping list for a user
-async function createShoppingList(userId, name) {
+async function createShoppingList(userId, listName) {
    const result = await pool.query(
-      'INSERT INTO shopping_list (user_id, name) VALUES ($1, $2) RETURNING *',
-      [userId, name]
+      'INSERT INTO shopping_list (user_id, list_name) VALUES ($1, $2) RETURNING *',
+      [userId, listName]
    );
    return result.rows[0];
 }

@@ -10,8 +10,8 @@ const shoppingListModel = require('../models/shoppingListModel');
 async function createShoppingList(req, res) {
   try {
     const userId = req.user.userId;
-    const { name } = req.body;
-    const newShoppingList = await shoppingListModel.createShoppingList(userId, name);
+    const { list_name } = req.body;
+    const newShoppingList = await shoppingListModel.createShoppingList(userId, list_name);
     res.status(201).json(newShoppingList);
   } catch (error) {
     console.error('Create shopping list error:', error);

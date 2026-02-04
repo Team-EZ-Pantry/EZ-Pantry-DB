@@ -14,6 +14,8 @@
     - [Update Username](#update-username)
     - [Update Password](#update-password)
     - [Delete User](#delete-user)
+    - [Get Theme Preferences](#get-theme-preferences)
+    - [Update Theme Preferences](#update-theme-preferences)
   - [Pantry Endpoints](#pantry-endpoints)
     - [Create Pantry](#create-pantry)
     - [Get All Pantries for a User](#get-all-pantries-for-a-user)
@@ -678,6 +680,178 @@ Authorization: Bearer user.token.here
 
 ---
 
+### Get Theme Preferences
+**GET** `/api/users/theme`
+
+Get the current user's theme preferences.
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "preferences": {
+        "themeMode": "dark",
+        "accentColor": 4283215696
+    }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `themeMode` | string | User's theme mode ('light' or 'dark') |
+| `accentColor` | integer | User's accent color as an integer value |
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "User not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+  "error": "Failed to retrieve theme preferences"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Theme preferences retrieved successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | User not found |
+| `500` | Internal server error |
+
+---
+
+### Update Theme Preferences
+**PATCH** `/api/users/theme`
+
+Update the current user's theme preferences.
+
+#### Request Body
+```json
+{
+    "themeMode": "dark",
+    "accentColor": 4283215696
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `themeMode` | string | No | Theme mode ('light' or 'dark') |
+| `accentColor` | integer | No | Accent color as an integer value |
+
+**Note:** Both fields are optional. You can update either field independently.
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+```json
+{
+    "preferences": {
+        "themeMode": "dark",
+        "accentColor": 4283215696
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Invalid theme mode. Must be one of: light, dark"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Invalid accent color. Must be an integer color value"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "User not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+  "error": "Failed to update theme preferences"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Theme preferences updated successfully |
+| `400` | Invalid theme mode or accent color |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | User not found |
+| `500` | Internal server error |
+
+---
+
 ## Pantry Endpoints
 
 ### Create Pantry
@@ -688,13 +862,13 @@ Create a new pantry
 #### Request Body 
 ```json
 {
-    "name" : "New Pantry"
+    "pantry_name" : "New Pantry"
 }
 ```
 
 | Field | Type | Required |
 |-------|------|----------|
-| `name` | string | Yes |
+| `pantry_name` | string | Yes |
 
 #### Request Header
 ```
@@ -710,8 +884,8 @@ Authorization: Bearer user.token.here
     "pantry": {
         "pantry_id": 11,
         "user_id": 1,
-        "name": "New Pantry",
-        "is_default": false,
+        "pantry_name": "New Pantry",
+        "last_visited": "2025-10-15T21:05:10.431Z",
         "created_at": "2025-10-15T21:05:10.431Z"
     }
 }
@@ -786,15 +960,15 @@ Authorization: Bearer user.token.here
         {
             "pantry_id": 12,
             "user_id": 1,
-            "name": "New",
-            "is_default": false,
+            "pantry_name": "New",
+            "last_visited": "2025-10-16T01:04:55.437Z",
             "created_at": "2025-10-16T01:04:55.437Z"
         },
         {
             "pantry_id": 6,
             "user_id": 1,
-            "name": "Testy",
-            "is_default": false,
+            "pantry_name": "Testy",
+            "last_visited": "2025-10-13T02:59:57.153Z",
             "created_at": "2025-10-13T02:59:57.153Z"
         }
     ]
@@ -869,8 +1043,8 @@ Authorization: Bearer user.token.here
     "pantry": {
         "pantry_id": 17,
         "user_id": 4,
-        "name": "pantry",
-        "is_default": false,
+        "pantry_name": "pantry",
+        "last_visited": "2025-11-07T02:41:17.481Z",
         "created_at": "2025-11-07T02:41:17.481Z",
         "products": [
             {
@@ -957,10 +1131,10 @@ Authorization: Bearer user.token.here
 
 Get a specific pantry by ID
 
-#### Request Body 
+#### Request Body
 ```json
 {
-    "name" : "My Pantry"
+    "pantry_name" : "My Pantry"
 }
 ```
 
@@ -978,8 +1152,8 @@ Authorization: Bearer user.token.here
     "pantry": {
         "pantry_id": 13,
         "user_id": 2,
-        "name": "My Pantry",
-        "is_default": false,
+        "pantry_name": "My Pantry",
+        "last_visited": "2025-10-16T01:22:09.581Z",
         "created_at": "2025-10-16T01:22:09.581Z"
     }
 }
@@ -993,7 +1167,7 @@ Authorization: Bearer user.token.here
 **Code:** `400 Bad Request`
 ```json
 {
-    "error": "Name is required"
+    "error": "Pantry name is required"
 }
 ```
 
@@ -1137,8 +1311,8 @@ Authorization: Bearer user.token.here
     "pantry": {
         "pantry_id": 11,
         "user_id": 1,
-        "name": "New Pantry",
-        "is_default": false,
+        "pantry_name": "New Pantry",
+        "last_visited": "2025-10-15T21:05:10.431Z",
         "created_at": "2025-10-15T21:05:10.431Z"
     }
 }
@@ -1988,16 +2162,16 @@ Authorization: Bearer user.token.here
 
 Create a new shopping list for the authenticated user.
 
-#### Request Body 
+#### Request Body
 ```json
 {
-    "name": "Weekly Groceries"
+    "list_name": "Weekly Groceries"
 }
 ```
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `name` | string | Yes | Name of the shopping list |
+| `list_name` | string | Yes | Name of the shopping list |
 
 #### Request Header
 ```
@@ -2011,8 +2185,10 @@ Authorization: Bearer user.token.here
 {
     "list_id": 3,
     "user_id": 1,
-    "name": "Weekly Groceries",
-    "created_at": "2025-11-07T10:30:00.000Z"
+    "list_name": "Weekly Groceries",
+    "created_at": "2025-11-07T10:30:00.000Z",
+    "updated_at": "2025-11-07T10:30:00.000Z",
+    "is_complete": false
 }
 ```
 
@@ -2083,8 +2259,10 @@ Authorization: Bearer user.token.here
     {
         "list_id": 1,
         "user_id": 1,
-        "name": "Weekly Groceries",
+        "list_name": "Weekly Groceries",
         "created_at": "2025-11-01T10:00:00.000Z",
+        "updated_at": "2025-11-01T10:00:00.000Z",
+        "is_complete": false,
         "items": [
             {
                 "item_id": 1,
@@ -2107,8 +2285,10 @@ Authorization: Bearer user.token.here
     {
         "list_id": 2,
         "user_id": 1,
-        "name": "Party Supplies",
+        "list_name": "Party Supplies",
         "created_at": "2025-11-05T14:30:00.000Z",
+        "updated_at": "2025-11-05T14:30:00.000Z",
+        "is_complete": false,
         "items": []
     }
 ]
@@ -2172,8 +2352,10 @@ Authorization: Bearer user.token.here
 {
     "list_id": 1,
     "user_id": 1,
-    "name": "Weekly Groceries",
+    "list_name": "Weekly Groceries",
     "created_at": "2025-11-01T10:00:00.000Z",
+    "updated_at": "2025-11-01T10:00:00.000Z",
+    "is_complete": false,
     "items": [
         {
             "item_id": 1,
