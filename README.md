@@ -2834,7 +2834,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Get Recipe
-**GET** `/api/recipe/:recipeId?scale=4`
+**GET** `/api/recipes/:recipeId?scale=4`
 
 Get a specific recipe with ingredients and instructions. Optionally scale ingredient quantities for a different number of servings.
 
@@ -2961,7 +2961,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Recipe
-**PATCH** `/api/recipe/:recipeId`
+**PATCH** `/api/recipes/:recipeId`
 
 Update recipe metadata (name, servings, prep/cook times, image). Does not modify ingredients or instructions.
 
@@ -3063,7 +3063,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Delete Recipe
-**DELETE** `/api/recipe/:recipeId`
+**DELETE** `/api/recipes/:recipeId`
 
 Delete a recipe. This also deletes all associated ingredients and instructions.
 
@@ -3131,7 +3131,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Add Ingredient
-**POST** `/api/recipe/:recipeId/ingredients`
+**POST** `/api/recipes/:recipeId/ingredients`
 
 Add an ingredient to a recipe.
 
@@ -3258,7 +3258,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Ingredient
-**PATCH** `/api/recipe/:recipeId/ingredients/:ingredientId`
+**PATCH** `/api/recipes/:recipeId/ingredients/:ingredientId`
 
 Update an existing ingredient in a recipe.
 
@@ -3373,7 +3373,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Remove Ingredient
-**DELETE** `/api/recipe/:recipeId/ingredients/:ingredientId`
+**DELETE** `/api/recipes/:recipeId/ingredients/:ingredientId`
 
 Remove an ingredient from a recipe.
 
@@ -3441,7 +3441,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Add Instruction
-**POST** `/api/recipe/:recipeId/instructions`
+**POST** `/api/recipes/:recipeId/instructions`
 
 Add an instruction step to a recipe. The instruction will be appended at the end.
 
@@ -3528,7 +3528,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Instruction
-**PATCH** `/api/recipe/:recipeId/instructions/:instructionId`
+**PATCH** `/api/recipes/:recipeId/instructions/:instructionId`
 
 Update an existing instruction's content or metadata.
 
@@ -3627,7 +3627,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Remove Instruction
-**DELETE** `/api/recipe/:recipeId/instructions/:instructionId`
+**DELETE** `/api/recipes/:recipeId/instructions/:instructionId`
 
 Remove an instruction from a recipe. Remaining steps will be automatically renumbered.
 
@@ -3695,7 +3695,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Reorder Instructions
-**PUT** `/api/recipe/:recipeId/instructions/reorder`
+**PUT** `/api/recipes/:recipeId/instructions/reorder`
 
 Reorder all instructions in a recipe by providing an array of instruction IDs in the desired order.
 
@@ -3808,7 +3808,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Check Ingredient Availability
-**GET** `/api/recipe/:recipeId/availability?scale=4`
+**GET** `/api/recipes/:recipeId/availability?scale=4`
 
 Check if you have the ingredients to make a recipe by checking across all your pantries. Optionally scale for a different number of servings.
 
