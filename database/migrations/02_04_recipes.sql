@@ -45,4 +45,4 @@ CREATE INDEX idx_recipe_ingredient_recipe_id ON recipe_ingredient(recipe_id);
 CREATE INDEX idx_recipe_ingredient_product_id ON recipe_ingredient(product_id) WHERE product_id IS NOT NULL;
 CREATE INDEX idx_recipe_ingredient_custom_product_id ON recipe_ingredient(custom_product_id) WHERE custom_product_id IS NOT NULL;
 CREATE INDEX idx_recipe_instruction_recipe_step ON recipe_instruction(recipe_id, step_number);
-CREATE INDEX idx_recipe_name ON recipe(name);
+CREATE INDEX idx_recipe_name ON recipe(recipe_name);
