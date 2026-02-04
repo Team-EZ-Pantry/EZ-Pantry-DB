@@ -1,7 +1,7 @@
 -- ================================================================================
 -- Updated schema: 2025-02-04
 -- Added recipe tables, pantry last visited, theme preferences, naming consistency
--- "name" -> "pantry_name" / "list_name"
+--      Routes use plural names. "name" -> "pantry_name" / "list_name"
 -- ================================================================================
 
 -- Enable extensions
