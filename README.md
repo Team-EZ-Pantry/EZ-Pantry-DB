@@ -71,7 +71,7 @@
 ✅ Recipe serving scaling \
 *Product categorization* \
 *Shared custom product database* \
-*Pantry/shopping list sharing between users* \
+*pantries/shopping list sharing between users* \
 *LLM recipe generation*
 
 ## Quick Start
@@ -83,7 +83,7 @@
 
 ### Installation
 ```bash
-git clone https://github.com/Team-EZ-Pantry/EZ-Pantry-DB.git
+git clone https://github.com/Team-EZ-pantries/EZ-Pantry-DB.git
 cd EZ-Pantry-DB/server
 npm install
 ```
@@ -324,7 +324,7 @@ Login with an email and password to receive a JWT.
 ## User Endpoints
 
 ### Get User
-**GET** `/api/user/me`
+**GET** `/api/users/me`
 
 Get the current user's information.
 
@@ -397,7 +397,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Username
-**PATCH** `/api/user/username`
+**PATCH** `/api/users/username`
 
 Update the current user's username.
 
@@ -493,7 +493,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Password
-**PATCH** `/api/user/password`
+**PATCH** `/api/users/password`
 
 Update the current user's password. Current and new password required.
 
@@ -605,7 +605,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Delete User
-**DELETE** `/api/user/me`
+**DELETE** `/api/users/me`
 
 Delete the current user. Password required.
 
@@ -681,7 +681,7 @@ Authorization: Bearer user.token.here
 ## Pantry Endpoints
 
 ### Create Pantry
-**POST** `/api/pantry/`
+**POST** `/api/pantries/`
 
 Create a new pantry
 
@@ -764,7 +764,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Get All Pantries for a User
-**GET** `/api/pantry`
+**GET** `/api/pantries`
 
 Get all pantries for an authenticated user
 
@@ -840,7 +840,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Get Pantry
-**GET** `/api/pantry/:pantryid?sort=name_asc`
+**GET** `/api/pantries/:pantryid?sort=name_asc`
 
 Get a specific pantry by ID. Pantry contents can be sorted by by name and date and filtered by category*. Sorting can be done for the entire pantry or within categories*.
 
@@ -953,7 +953,7 @@ Authorization: Bearer user.token.here
 | `500` | Internal server error |
 
 ### Update Pantry Name
-**GET** `/api/pantry/:pantryid/name`
+**GET** `/api/pantries/:pantryid/name`
 
 Get a specific pantry by ID
 
@@ -1040,7 +1040,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Pantry Last Visited Timestamp
-**PATCH** `/api/pantry/:pantryid/last-visited`
+**PATCH** `/api/pantries/:pantryid/last-visited`
 
 Update the last visited timestamp of a pantry to the current time. To be called whenever a user opens a pantry.
 
@@ -1111,13 +1111,13 @@ Authorization: Bearer user.token.here
 ---
 
 ### Delete Pantry
-**DELETE** `/api/pantry/:pantryid`
+**DELETE** `/api/pantries/:pantryid`
 
 Delete a pantry by ID
 
 *Delete the pantry with ID = 20:*
 ```
-http://localhost:3000/api/pantry/20
+http://localhost:3000/api/pantries/20
 ```
 
 #### Request Body 
@@ -1194,10 +1194,10 @@ Authorization: Bearer user.token.here
 
 ## Regular and Custom Pantry Product Endpoints
 Regular and custom product functionality is identical. Simply substitute **`custom-products`** for `products` in the API URL, e.g.:
-```/api/pantry/:pantryid/custom-products/:productId```
+```/api/pantries/:pantryid/custom-products/:productId```
 
 ### Add Product to Pantry
-**POST** `/api/pantry/:pantryid/products/:productId`
+**POST** `/api/pantries/:pantryid/products/:productId`
 
 Add a product to a users's pantry.
 
@@ -1288,7 +1288,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Remove Product from Pantry
-**DELETE** `/api/pantry/:pantryid/products/:productid`
+**DELETE** `/api/pantries/:pantryid/products/:productid`
 
 Remove a given product from a given pantry
 
@@ -1369,7 +1369,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Product Quantity
-**PATCH** `/api/pantry/:pantryid/products/:productid/quantity`
+**PATCH** `/api/pantries/:pantryid/products/:productid/quantity`
 
 Update the quantity of a product in a pantry. (quantity <= 0 does not delete)
 
@@ -1467,7 +1467,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Update Product Expiration Date
-**PATCH** `/api/pantry/:pantryid/products/:productid/expiration`
+**PATCH** `/api/pantries/:pantryid/products/:productid/expiration`
 
 Update the expiration date of a product in a pantry
 
@@ -1984,7 +1984,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Create Shopping List
-**POST** `/api/shopping-list`
+**POST** `/api/shopping-lists`
 
 Create a new shopping list for the authenticated user.
 
@@ -2063,7 +2063,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Get all Shopping Lists
-**GET** `/api/shopping-list`
+**GET** `/api/shopping-lists`
 
 Get all shopping lists for the authenticated user.
 
@@ -2153,7 +2153,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Get Shopping List
-**GET** `/api/shopping-list/:listId`
+**GET** `/api/shopping-lists/:listId`
 
 Get a specific shopping list by ID with all its items.
 
@@ -2244,13 +2244,13 @@ Authorization: Bearer user.token.here
 ---
 
 ### Delete Shopping List
-**DELETE** `/api/shopping-list/:listId`
+**DELETE** `/api/shopping-lists/:listId`
 
 Delete a shopping list by ID. This also deletes all associated items.
 
 *Delete the shopping list with ID = 3:*
 ```
-http://localhost:3000/api/shopping-list/3
+http://localhost:3000/api/shopping-lists/3
 ```
 
 #### Request Body 
@@ -2317,7 +2317,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Create and Add Item to Shopping List
-**POST** `/api/shopping-list/:listId`
+**POST** `/api/shopping-lists/:listId`
 
 Create and add an item, deliniated by a product, custom product, and/or some custom text to a shopping list. Quantity can be specified.
 
@@ -2415,13 +2415,13 @@ Authorization: Bearer user.token.here
 ---
 
 ### Remove Item from Shopping List
-**DELETE** `/api/shopping-list/:listId/items/:itemId`
+**DELETE** `/api/shopping-lists/:listId/items/:itemId`
 
 Remove a specific item from a shopping list.
 
 *Remove item with ID = 5 from list with ID = 1:*
 ```
-http://localhost:3000/api/shopping-list/1/items/5
+http://localhost:3000/api/shopping-lists/1/items/5
 ```
 
 #### Request Body 
@@ -2488,13 +2488,13 @@ Authorization: Bearer user.token.here
 ---
 
 ### Toggle Item Checked Status
-**PATCH** `/api/shopping-list/:listId/items/:itemId`
+**PATCH** `/api/shopping-lists/:listId/items/:itemId`
 
 Toggle the checked/unchecked status of an item in a shopping list.
 
 *Toggle item with ID = 5 in list with ID = 1:*
 ```
-http://localhost:3000/api/shopping-list/1/items/5
+http://localhost:3000/api/shopping-lists/1/items/5
 ```
 
 #### Request Body 
@@ -2568,7 +2568,7 @@ Authorization: Bearer user.token.here
 ## Recipe Endpoints
 
 ### Create Recipe
-**POST** `/api/recipe`
+**POST** `/api/recipes`
 
 Create a new recipe with ingredients and instructions.
 
@@ -2753,7 +2753,7 @@ Authorization: Bearer user.token.here
 ---
 
 ### Get All Recipes
-**GET** `/api/recipe`
+**GET** `/api/recipes`
 
 Get all recipes for the authenticated user.
 
