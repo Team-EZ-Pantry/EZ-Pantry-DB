@@ -17,7 +17,7 @@ CREATE TABLE recipe_ingredient (
     custom_product_id INT REFERENCES custom_product(custom_product_id) ON DELETE SET NULL,
     free_text TEXT,
     quantity DECIMAL(10,2),
-    unit_of_measurement TEXT,
+    unit TEXT, -- of measurement
     display_order INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 

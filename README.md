@@ -41,6 +41,20 @@
     - [Create and Add Item to Shopping List](#create-and-add-item-to-shopping-list)
     - [Remove Item from Shopping List](#remove-item-from-shopping-list)
     - [Toggle Item Checked Status](#toggle-item-checked-status)
+  - [Recipe Endpoints](#recipe-endpoints)
+    - [Create Recipe](#create-recipe)
+    - [Get All Recipes](#get-all-recipes)
+    - [Get Recipe](#get-recipe)
+    - [Update Recipe](#update-recipe)
+    - [Delete Recipe](#delete-recipe)
+    - [Add Ingredient](#add-ingredient)
+    - [Update Ingredient](#update-ingredient)
+    - [Remove Ingredient](#remove-ingredient)
+    - [Add Instruction](#add-instruction)
+    - [Update Instruction](#update-instruction)
+    - [Remove Instruction](#remove-instruction)
+    - [Reorder Instructions](#reorder-instructions)
+    - [Check Ingredient Availability](#check-ingredient-availability)
 
 ## EZ Pantry Features
 
@@ -52,10 +66,13 @@
 ✅ Custom products associated with a user \
 ✅ Create and save shopping lists \
 ✅ Barcode scanning \
+✅ Recipe management (create, update, delete recipes with ingredients and instructions) \
+✅ Ingredient availability checking across pantries \
+✅ Recipe serving scaling \
 *Product categorization* \
-*Shared custom product database * \
+*Shared custom product database* \
 *Pantry/shopping list sharing between users* \
-*LLM recipe generation + custom recipes + saving recipes*
+*LLM recipe generation*
 
 ## Quick Start
 
@@ -2544,6 +2561,1381 @@ Authorization: Bearer user.token.here
 | `401` | No token |
 | `403` | Bad or expired token |
 | `404` | Item not found in shopping list |
+| `500` | Internal server error |
+
+---
+
+## Recipe Endpoints
+
+### Create Recipe
+**POST** `/api/recipe`
+
+Create a new recipe with ingredients and instructions.
+
+#### Request Body
+```json
+{
+    "recipe_name": "Chocolate Chip Cookies",
+    "servings": 24,
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 12,
+    "image_url": "https://example.com/cookies.jpg",
+    "ingredients": [
+        {
+            "product_id": 123,
+            "quantity": 2,
+            "unit": "cups",
+            "display_order": 0
+        },
+        {
+            "custom_product_id": 5,
+            "quantity": 1,
+            "unit": "cup",
+            "display_order": 1
+        },
+        {
+            "free_text": "A pinch of salt",
+            "display_order": 2
+        }
+    ],
+    "instructions": [
+        {
+            "content": "Preheat oven to 375°F",
+            "step_number": 1,
+            "metadata": {}
+        },
+        {
+            "content": "Mix dry ingredients in a large bowl",
+            "step_number": 2
+        }
+    ]
+}
+```
+
+| Field                | Type     | Required | Description                                    |
+|----------------------|----------|----------|------------------------------------------------|
+| `recipe_name`        | string   | Yes      | Name of the recipe                             |
+| `servings`           | number   | No       | Number of servings (default: 1)                |
+| `prep_time_minutes`  | number   | No       | Preparation time in minutes                    |
+| `cook_time_minutes`  | number   | No       | Cooking time in minutes                        |
+| `image_url`          | string   | No       | URL to recipe image                            |
+| `ingredients`        | array    | No       | Array of ingredient objects                    |
+| `instructions`       | array    | No       | Array of instruction objects                   |
+
+**Ingredient Object Fields:**
+- Must provide one of: `product_id`, `custom_product_id`, or `free_text`
+- Cannot provide both `product_id` and `custom_product_id`
+- `quantity` (number, optional): Ingredient quantity
+- `unit` (string, optional): Unit of measurement
+- `display_order` (number, optional): Order for display (auto-assigned if omitted)
+
+**Instruction Object Fields:**
+- `content` (string, required): Instruction text
+- `step_number` (number, optional): Step number (auto-assigned if omitted)
+- `metadata` (object, optional): Additional metadata as JSON
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `201 Created`
+
+```json
+{
+    "recipe_id": 1,
+    "user_id": 4,
+    "recipe_name": "Chocolate Chip Cookies",
+    "servings": 24,
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 12,
+    "image_url": "https://example.com/cookies.jpg",
+    "created_at": "2026-02-04T10:00:00.000Z",
+    "updated_at": "2026-02-04T10:00:00.000Z",
+    "ingredients": [
+        {
+            "ingredient_id": 1,
+            "recipe_id": 1,
+            "product_id": 123,
+            "custom_product_id": null,
+            "free_text": null,
+            "quantity": 2,
+            "unit": "cups",
+            "display_order": 0
+        }
+    ],
+    "instructions": [
+        {
+            "instruction_id": 1,
+            "recipe_id": 1,
+            "step_number": 1,
+            "content": "Preheat oven to 375°F",
+            "metadata": {}
+        }
+    ]
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "recipe_name is required"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Cannot provide both product_id and custom_product_id for an ingredient"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Each ingredient must have product_id, custom_product_id, or free_text"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Each instruction must have content"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Referenced product ID does not exist"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to create recipe"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `201` | Recipe created successfully |
+| `400` | Invalid input |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Referenced product not found |
+| `500` | Internal server error |
+
+---
+
+### Get All Recipes
+**GET** `/api/recipe`
+
+Get all recipes for the authenticated user.
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+[
+    {
+        "recipe_id": 1,
+        "user_id": 4,
+        "recipe_name": "Chocolate Chip Cookies",
+        "servings": 24,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": 12,
+        "image_url": "https://example.com/cookies.jpg",
+        "created_at": "2026-02-04T10:00:00.000Z",
+        "updated_at": "2026-02-04T10:00:00.000Z"
+    },
+    {
+        "recipe_id": 2,
+        "user_id": 4,
+        "recipe_name": "Pasta Carbonara",
+        "servings": 4,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 20,
+        "image_url": null,
+        "created_at": "2026-02-03T14:30:00.000Z",
+        "updated_at": "2026-02-03T14:30:00.000Z"
+    }
+]
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to retrieve recipes"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Recipes retrieved successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `500` | Internal server error |
+
+---
+
+### Get Recipe
+**GET** `/api/recipe/:recipeId?scale=4`
+
+Get a specific recipe with ingredients and instructions. Optionally scale ingredient quantities for a different number of servings.
+
+#### Query Parameters
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `scale`   | number | No       | Number of servings to scale to. Ingredient quantities will be adjusted proportionally. |
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "recipe_id": 1,
+    "user_id": 4,
+    "recipe_name": "Chocolate Chip Cookies",
+    "servings": 24,
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 12,
+    "image_url": "https://example.com/cookies.jpg",
+    "created_at": "2026-02-04T10:00:00.000Z",
+    "updated_at": "2026-02-04T10:00:00.000Z",
+    "scaled_servings": 4,
+    "ingredients": [
+        {
+            "ingredient_id": 1,
+            "product_id": 123,
+            "custom_product_id": null,
+            "free_text": null,
+            "quantity": 2,
+            "scaled_quantity": 0.33,
+            "unit": "cups",
+            "display_order": 0,
+            "product_name": "All-Purpose Flour"
+        },
+        {
+            "ingredient_id": 2,
+            "product_id": null,
+            "custom_product_id": null,
+            "free_text": "A pinch of salt",
+            "quantity": null,
+            "scaled_quantity": null,
+            "unit": null,
+            "display_order": 1,
+            "product_name": null
+        }
+    ],
+    "instructions": [
+        {
+            "instruction_id": 1,
+            "recipe_id": 1,
+            "step_number": 1,
+            "content": "Preheat oven to 375°F",
+            "metadata": {},
+            "created_at": "2026-02-04T10:00:00.000Z"
+        },
+        {
+            "instruction_id": 2,
+            "recipe_id": 1,
+            "step_number": 2,
+            "content": "Mix dry ingredients in a large bowl",
+            "metadata": {},
+            "created_at": "2026-02-04T10:00:00.000Z"
+        }
+    ]
+}
+```
+
+**Note:** When `scale` parameter is provided, the response includes `scaled_servings` and `scaled_quantity` for each ingredient.
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Recipe not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to retrieve recipe"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Recipe retrieved successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Recipe not found |
+| `500` | Internal server error |
+
+---
+
+### Update Recipe
+**PATCH** `/api/recipe/:recipeId`
+
+Update recipe metadata (name, servings, prep/cook times, image). Does not modify ingredients or instructions.
+
+#### Request Body
+```json
+{
+    "recipe_name": "Updated Recipe Name",
+    "servings": 12,
+    "prep_time_minutes": 20,
+    "cook_time_minutes": 15,
+    "image_url": "https://example.com/new-image.jpg"
+}
+```
+
+| Field                | Type   | Required | Description                     |
+|----------------------|--------|----------|---------------------------------|
+| `recipe_name`        | string | No       | Updated recipe name             |
+| `servings`           | number | No       | Updated serving count           |
+| `prep_time_minutes`  | number | No       | Updated prep time               |
+| `cook_time_minutes`  | number | No       | Updated cook time               |
+| `image_url`          | string | No       | Updated image URL               |
+
+**Note:** Only provide fields you want to update. At least one field must be provided.
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "recipe_id": 1,
+    "user_id": 4,
+    "recipe_name": "Updated Recipe Name",
+    "servings": 12,
+    "prep_time_minutes": 20,
+    "cook_time_minutes": 15,
+    "image_url": "https://example.com/new-image.jpg",
+    "created_at": "2026-02-04T10:00:00.000Z",
+    "updated_at": "2026-02-04T11:30:00.000Z"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "No valid fields to update"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Recipe not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to update recipe"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Recipe updated successfully |
+| `400` | No valid fields provided |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Recipe not found |
+| `500` | Internal server error |
+
+---
+
+### Delete Recipe
+**DELETE** `/api/recipe/:recipeId`
+
+Delete a recipe. This also deletes all associated ingredients and instructions.
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Recipe deleted successfully"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Recipe not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to delete recipe"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Recipe deleted successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Recipe not found |
+| `500` | Internal server error |
+
+---
+
+### Add Ingredient
+**POST** `/api/recipe/:recipeId/ingredients`
+
+Add an ingredient to a recipe.
+
+#### Request Body
+```json
+{
+    "product_id": 123,
+    "quantity": 2,
+    "unit": "cups",
+    "display_order": 5
+}
+```
+
+**OR**
+
+```json
+{
+    "custom_product_id": 5,
+    "quantity": 1,
+    "unit": "tablespoon"
+}
+```
+
+**OR**
+
+```json
+{
+    "free_text": "A pinch of salt"
+}
+```
+
+| Field               | Type   | Required     | Description                                               |
+|---------------------|--------|--------------|-----------------------------------------------------------|
+| `product_id`        | number | Conditional* | ID of standard product                                    |
+| `custom_product_id` | number | Conditional* | ID of custom product                                      |
+| `free_text`         | string | Conditional* | Free text ingredient description                          |
+| `quantity`          | number | No           | Ingredient quantity                                       |
+| `unit`              | string | No           | Unit of measurement                                       |
+| `display_order`     | number | No           | Display order (defaults to end of list if not provided)   |
+
+**Note*:** Must provide one of: `product_id`, `custom_product_id`, or `free_text`. Cannot provide both `product_id` and `custom_product_id`.
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `201 Created`
+
+```json
+{
+    "ingredient_id": 10,
+    "recipe_id": 1,
+    "product_id": 123,
+    "custom_product_id": null,
+    "free_text": null,
+    "quantity": 2,
+    "unit": "cups",
+    "display_order": 5,
+    "created_at": "2026-02-04T12:00:00.000Z"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Cannot provide both product_id and custom_product_id"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Must provide product_id, custom_product_id, or free_text"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Referenced product ID does not exist"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to add ingredient"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `201` | Ingredient added successfully |
+| `400` | Invalid input |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Product not found |
+| `500` | Internal server error |
+
+---
+
+### Update Ingredient
+**PATCH** `/api/recipe/:recipeId/ingredients/:ingredientId`
+
+Update an existing ingredient in a recipe.
+
+#### Request Body
+```json
+{
+    "quantity": 3,
+    "unit": "tablespoons",
+    "display_order": 2
+}
+```
+
+| Field               | Type   | Required | Description                     |
+|---------------------|--------|----------|---------------------------------|
+| `product_id`        | number | No       | Updated product ID              |
+| `custom_product_id` | number | No       | Updated custom product ID       |
+| `free_text`         | string | No       | Updated free text               |
+| `quantity`          | number | No       | Updated quantity                |
+| `unit`              | string | No       | Updated unit                    |
+| `display_order`     | number | No       | Updated display order           |
+
+**Note:** Only provide fields you want to update. Cannot provide both `product_id` and `custom_product_id`.
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "ingredient_id": 10,
+    "recipe_id": 1,
+    "product_id": 123,
+    "custom_product_id": null,
+    "free_text": null,
+    "quantity": 3,
+    "unit": "tablespoons",
+    "display_order": 2,
+    "created_at": "2026-02-04T12:00:00.000Z"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Cannot provide both product_id and custom_product_id"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "No valid fields to update"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Ingredient not found"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Referenced product ID does not exist"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to update ingredient"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Ingredient updated successfully |
+| `400` | Invalid input |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Ingredient or product not found |
+| `500` | Internal server error |
+
+---
+
+### Remove Ingredient
+**DELETE** `/api/recipe/:recipeId/ingredients/:ingredientId`
+
+Remove an ingredient from a recipe.
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Ingredient removed successfully"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Ingredient not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to remove ingredient"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Ingredient removed successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Ingredient not found |
+| `500` | Internal server error |
+
+---
+
+### Add Instruction
+**POST** `/api/recipe/:recipeId/instructions`
+
+Add an instruction step to a recipe. The instruction will be appended at the end.
+
+#### Request Body
+```json
+{
+    "content": "Bake for 12 minutes or until golden brown",
+    "metadata": {
+        "timer": 720
+    }
+}
+```
+
+| Field      | Type   | Required | Description                                    |
+|------------|--------|----------|------------------------------------------------|
+| `content`  | string | Yes      | Instruction text                               |
+| `metadata` | object | No       | Additional metadata as JSON (e.g., timers)     |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `201 Created`
+
+```json
+{
+    "instruction_id": 5,
+    "recipe_id": 1,
+    "step_number": 3,
+    "content": "Bake for 12 minutes or until golden brown",
+    "metadata": {
+        "timer": 720
+    },
+    "created_at": "2026-02-04T13:00:00.000Z"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Instruction content is required"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to add instruction"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `201` | Instruction added successfully |
+| `400` | Invalid input (missing content) |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `500` | Internal server error |
+
+---
+
+### Update Instruction
+**PATCH** `/api/recipe/:recipeId/instructions/:instructionId`
+
+Update an existing instruction's content or metadata.
+
+#### Request Body
+```json
+{
+    "content": "Bake for 15 minutes or until golden brown",
+    "metadata": {
+        "timer": 900,
+        "temperature": 375
+    }
+}
+```
+
+| Field      | Type   | Required | Description              |
+|------------|--------|----------|--------------------------|
+| `content`  | string | No       | Updated instruction text |
+| `metadata` | object | No       | Updated metadata         |
+
+**Note:** Only provide fields you want to update.
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "instruction_id": 5,
+    "recipe_id": 1,
+    "step_number": 3,
+    "content": "Bake for 15 minutes or until golden brown",
+    "metadata": {
+        "timer": 900,
+        "temperature": 375
+    },
+    "created_at": "2026-02-04T13:00:00.000Z"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "No valid fields to update"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Instruction not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to update instruction"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Instruction updated successfully |
+| `400` | No valid fields provided |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Instruction not found |
+| `500` | Internal server error |
+
+---
+
+### Remove Instruction
+**DELETE** `/api/recipe/:recipeId/instructions/:instructionId`
+
+Remove an instruction from a recipe. Remaining steps will be automatically renumbered.
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "Instruction removed successfully"
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Instruction not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to remove instruction"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Instruction removed successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Instruction not found |
+| `500` | Internal server error |
+
+---
+
+### Reorder Instructions
+**PUT** `/api/recipe/:recipeId/instructions/reorder`
+
+Reorder all instructions in a recipe by providing an array of instruction IDs in the desired order.
+
+#### Request Body
+```json
+{
+    "order": [5, 3, 1, 2, 4]
+}
+```
+
+| Field   | Type  | Required | Description                                                  |
+|---------|-------|----------|--------------------------------------------------------------|
+| `order` | array | Yes      | Array of instruction IDs in the desired order. Must include all instruction IDs for the recipe. |
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+[
+    {
+        "instruction_id": 5,
+        "recipe_id": 1,
+        "step_number": 1,
+        "content": "Preheat oven to 375°F",
+        "metadata": {},
+        "created_at": "2026-02-04T10:00:00.000Z"
+    },
+    {
+        "instruction_id": 3,
+        "recipe_id": 1,
+        "step_number": 2,
+        "content": "Mix dry ingredients",
+        "metadata": {},
+        "created_at": "2026-02-04T10:00:00.000Z"
+    },
+    {
+        "instruction_id": 1,
+        "recipe_id": 1,
+        "step_number": 3,
+        "content": "Add wet ingredients",
+        "metadata": {},
+        "created_at": "2026-02-04T10:00:00.000Z"
+    }
+]
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Must provide an array of instruction IDs in \"order\""
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Instruction 5 does not belong to this recipe"
+}
+```
+
+**Code:** `400 Bad Request`
+```json
+{
+    "error": "Must include all instruction IDs in the reorder"
+}
+```
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to reorder instructions"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Instructions reordered successfully |
+| `400` | Invalid input (missing order array, invalid IDs, or incomplete list) |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `500` | Internal server error |
+
+---
+
+### Check Ingredient Availability
+**GET** `/api/recipe/:recipeId/availability?scale=4`
+
+Check if you have the ingredients to make a recipe by checking across all your pantries. Optionally scale for a different number of servings.
+
+#### Query Parameters
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `scale`   | number | No       | Number of servings to scale to. Needed quantities will be adjusted proportionally. |
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "recipe_id": 1,
+    "recipe_name": "Chocolate Chip Cookies",
+    "servings": 24,
+    "status": "partially_available",
+    "summary": {
+        "total_linked_ingredients": 5,
+        "available_count": 3,
+        "missing_count": 2,
+        "free_text_only_count": 1
+    },
+    "ingredients": [
+        {
+            "ingredient_id": 1,
+            "free_text": null,
+            "product_id": 123,
+            "custom_product_id": null,
+            "product_name": "All-Purpose Flour",
+            "needed_quantity": 2,
+            "unit": "cups",
+            "available_quantity": 5,
+            "is_available": true,
+            "pantry_sources": [
+                {
+                    "pantry_id": 5,
+                    "pantry_name": "Kitchen Pantry",
+                    "quantity": 5
+                }
+            ]
+        },
+        {
+            "ingredient_id": 2,
+            "free_text": null,
+            "product_id": null,
+            "custom_product_id": 8,
+            "product_name": "Homemade Vanilla Extract",
+            "needed_quantity": 1,
+            "unit": "teaspoon",
+            "available_quantity": 0,
+            "is_available": false,
+            "pantry_sources": []
+        },
+        {
+            "ingredient_id": 3,
+            "free_text": "A pinch of salt",
+            "product_id": null,
+            "custom_product_id": null,
+            "product_name": null,
+            "needed_quantity": null,
+            "unit": null,
+            "available_quantity": 0,
+            "is_available": null,
+            "pantry_sources": []
+        }
+    ]
+}
+```
+
+**Status Values:**
+- `can_cook`: All linked ingredients are available
+- `partially_available`: Some linked ingredients are available
+- `missing_all`: No linked ingredients are available
+- `unknown`: Recipe has no linked ingredients (only free text)
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Recipe not found"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to check ingredient availability"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Availability checked successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Recipe not found |
 | `500` | Internal server error |
 
 ---

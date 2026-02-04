@@ -22,7 +22,7 @@ async function createRecipe(userId, { recipe_name, servings, prep_time_minutes, 
     // Insert recipe
     const recipeResult = await client.query(
       `INSERT INTO recipe (user_id, recipe_name, servings, prep_time_minutes, cook_time_minutes, image_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [userId, recipe_name, servings || 1, prep_time_minutes || null, cook_time_minutes || null, image_url || null]
     );
     const recipe = recipeResult.rows[0];
@@ -92,12 +92,12 @@ async function getRecipeById(recipeId) {
 
   const recipe = recipeResult.rows[0];
 
-  // Get ingredients with product recipe_names
+  // Get ingredients with their product names
   const ingredientsResult = await pool.query(
     `SELECT
       ri.ingredient_id, ri.product_id, ri.custom_product_id, ri.free_text,
       ri.quantity, ri.unit, ri.display_order,
-      COALESCE(p.product_recipe_name, cp.product_recipe_name) AS product_recipe_name
+      COALESCE(p.product_name, cp.product_name) AS product_name
     FROM recipe_ingredient ri
     LEFT JOIN product p ON ri.product_id = p.product_id
     LEFT JOIN custom_product cp ON ri.custom_product_id = cp.custom_product_id
@@ -434,7 +434,7 @@ async function checkAvailability(recipeId, userId) {
     `SELECT
       ri.ingredient_id, ri.free_text, ri.product_id, ri.custom_product_id,
       ri.quantity AS recipe_quantity, ri.unit, ri.display_order,
-      COALESCE(p.product_recipe_name, cp.product_recipe_name) AS product_recipe_name,
+      COALESCE(p.product_name, cp.product_name) AS product_name,
       CASE
         WHEN p.product_id IS NOT NULL THEN 'product'
         WHEN cp.custom_product_id IS NOT NULL THEN 'custom_product'
@@ -455,7 +455,7 @@ async function checkAvailability(recipeId, userId) {
         SUM(pp.quantity) AS total_quantity,
         json_agg(json_build_object(
           'pantry_id', pan.pantry_id,
-          'pantry_recipe_name', pan.recipe_name,
+          'pantry_name', pan.name,
           'quantity', pp.quantity
         )) AS pantry_sources
       FROM pantry_product pp
