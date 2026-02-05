@@ -1,6 +1,7 @@
 const pantryModel = require('../models/pantryModel');
 const productModel = require('../models/productModel');
 const recipeModel = require('../models/recipeModel');
+const shoppingListModel = require('../models/shoppingListModel');
 
 // ***************************************************************
 // *      Validate user owns both pantry and custom product      *
@@ -66,8 +67,30 @@ async function validateRecipeAccess(req, res, next) {
   }
 }
 
+// ***************************************************************
+// *              Validate user owns shopping list               *
+// * For routes that operate on a shopping list or its items     *
+// ***************************************************************
+async function validateShoppingListAccess(req, res, next) {
+  try {
+    const { listId } = req.params;
+    const userId = req.user.userId;
+
+    const ownsList = await shoppingListModel.verifyShoppingListOwnership(listId, userId);
+    if (!ownsList) {
+      return res.status(404).json({ error: 'Shopping list not found or access denied' });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Shopping list access validation error:', error);
+    res.status(500).json({ error: 'Shopping list access validation failed' });
+  }
+}
+
 module.exports = {
   validateCustomProductAccess,
   validatePantryAccess,
-  validateRecipeAccess
+  validateRecipeAccess,
+  validateShoppingListAccess
 };

@@ -2162,6 +2162,9 @@ Authorization: Bearer user.token.here
 
 Create a new shopping list for the authenticated user.
 
+**Authentication Required**: Yes (JWT token)
+**Validates Ownership**: No (creates new resource)
+
 #### Request Body
 ```json
 {
@@ -2200,7 +2203,7 @@ Authorization: Bearer user.token.here
 **Code:** `400 Bad Request`
 ```json
 {
-    "error": "Shopping list name is required"
+    "error": "list_name is required and cannot be empty"
 }
 ```
 
@@ -2242,6 +2245,9 @@ Authorization: Bearer user.token.here
 **GET** `/api/shopping-lists`
 
 Get all shopping lists for the authenticated user.
+
+**Authentication Required**: Yes (JWT token)
+**Validates Ownership**: No (filters by authenticated user)
 
 #### Request Body 
 None
@@ -2337,6 +2343,9 @@ Authorization: Bearer user.token.here
 
 Get a specific shopping list by ID with all its items.
 
+**Authentication Required**: Yes (JWT token)
+**Validates Ownership**: Yes
+
 #### Request Body 
 None
 
@@ -2351,29 +2360,34 @@ Authorization: Bearer user.token.here
 ```json
 {
     "list_id": 1,
-    "user_id": 1,
     "list_name": "Weekly Groceries",
+    "is_complete": false,
     "created_at": "2025-11-01T10:00:00.000Z",
     "updated_at": "2025-11-01T10:00:00.000Z",
-    "is_complete": false,
-    "items": [
+    "shopping_list_items": [
         {
             "item_id": 1,
             "product_id": 5,
-            "product_name": "Milk",
-            "brand": "Dairy Farm",
-            "image_url": null,
+            "custom_product_id": null,
+            "text": null,
             "quantity": 2,
-            "is_checked": false
+            "checked": false,
+            "created_at": "2025-11-01T10:00:00.000Z",
+            "updated_at": "2025-11-01T10:00:00.000Z",
+            "product_name": "Milk",
+            "custom_product_name": null
         },
         {
             "item_id": 2,
-            "product_id": 10,
-            "product_name": "Bread",
-            "brand": "Bakery Fresh",
-            "image_url": null,
+            "product_id": null,
+            "custom_product_id": 3,
+            "text": null,
             "quantity": 1,
-            "is_checked": true
+            "checked": true,
+            "created_at": "2025-11-01T10:30:00.000Z",
+            "updated_at": "2025-11-01T10:30:00.000Z",
+            "product_name": null,
+            "custom_product_name": "Homemade Cookies"
         }
     ]
 }
@@ -2401,7 +2415,7 @@ Authorization: Bearer user.token.here
 **Code:** `404 Not Found`
 ```json
 {
-    "error": "Shopping list not found"
+    "error": "Shopping list not found or access denied"
 }
 ```
 
@@ -2429,6 +2443,9 @@ Authorization: Bearer user.token.here
 **DELETE** `/api/shopping-lists/:listId`
 
 Delete a shopping list by ID. This also deletes all associated items.
+
+**Authentication Required**: Yes (JWT token)
+**Validates Ownership**: Yes
 
 *Delete the shopping list with ID = 3:*
 ```
@@ -2474,7 +2491,7 @@ Authorization: Bearer user.token.here
 **Code:** `404 Not Found`
 ```json
 {
-    "error": "Shopping list not found"
+    "error": "Shopping list not found or access denied"
 }
 ```
 
@@ -2499,26 +2516,35 @@ Authorization: Bearer user.token.here
 ---
 
 ### Create and Add Item to Shopping List
-**POST** `/api/shopping-lists/:listId`
+**POST** `/api/shopping-lists/:listId/items`
 
-Create and add an item, deliniated by a product, custom product, and/or some custom text to a shopping list. Quantity can be specified.
+Create and add an item, delineated by a product, custom product, and/or some custom text to a shopping list. Quantity can be specified.
+
+**Authentication Required**: Yes (JWT token)
+**Validates Ownership**: Yes
 
 #### Request Body
 ```json
 {
-    "productId": 555,
-    "text": "Bunch of milk"
+    "product_id": 555,
+    "text": "Bunch of milk",
+    "quantity": 2
 }
 ```
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `productId` | number | Conditional* | ID of the product to add |
-| `customProductId` | number | Conditional* | ID of the custom product to add |
-| `text` | String | Conditional* | ID of the custom product to add |
-| `quantity` | number | No | Quantity of the product |
+| `product_id` | number | Conditional* | ID of the standard product to add |
+| `custom_product_id` | number | Conditional* | ID of the custom product to add |
+| `text` | string | Conditional* | Custom text description for the item |
+| `quantity` | number | No | Quantity of the product (must be >= 1 if provided) |
 
-**Note*: Must provide one of: `productId`, `customProductId`, or `text`. You can optionally combine `text` with either `productId` or `customProductId` to add a note to an item.
+**Validation Rules**:
+- Cannot provide both `product_id` and `custom_product_id` (mutually exclusive)
+- Must provide at least one of: `product_id`, `custom_product_id`, or `text`
+- If only `text` is provided, it cannot be an empty string
+- `quantity` must be at least 1 if provided
+- You can optionally combine `text` with either `product_id` or `custom_product_id` to add a note to an item
 
 #### Request Header
 ```
@@ -2547,10 +2573,25 @@ Authorization: Bearer user.token.here
 <details>
 <summary>Click to view all error codes</summary>
 
-**Code:** `400 Bad Request`
+**Code:** `400 Bad Request` (multiple possible error messages)
 ```json
 {
-    "error": "Product ID and quantity are required"
+    "error": "Cannot provide both product_id and custom_product_id for the same item"
+}
+```
+```json
+{
+    "error": "Must provide product_id, custom_product_id, or text to add an item"
+}
+```
+```json
+{
+    "error": "Quantity must be at least 1"
+}
+```
+```json
+{
+    "error": "Text cannot be empty"
 }
 ```
 
@@ -2571,7 +2612,12 @@ Authorization: Bearer user.token.here
 **Code:** `404 Not Found`
 ```json
 {
-    "error": "Shopping list not found"
+    "error": "Shopping list not found or access denied"
+}
+```
+```json
+{
+    "error": "Product ID does not exist"
 }
 ```
 
@@ -2588,10 +2634,10 @@ Authorization: Bearer user.token.here
 | Code | Description |
 |------|-------------|
 | `201` | Item added successfully |
-| `400` | Invalid input (missing productId or quantity) |
+| `400` | Invalid input (validation rules violated) |
 | `401` | No token |
 | `403` | Bad or expired token |
-| `404` | Shopping list not found |
+| `404` | Shopping list not found or product does not exist |
 | `500` | Internal server error |
 
 ---
@@ -2600,6 +2646,9 @@ Authorization: Bearer user.token.here
 **DELETE** `/api/shopping-lists/:listId/items/:itemId`
 
 Remove a specific item from a shopping list.
+
+**Authentication Required**: Yes (JWT token)
+**Validates Ownership**: Yes
 
 *Remove item with ID = 5 from list with ID = 1:*
 ```
@@ -2645,6 +2694,11 @@ Authorization: Bearer user.token.here
 **Code:** `404 Not Found`
 ```json
 {
+    "error": "Shopping list not found or access denied"
+}
+```
+```json
+{
     "error": "Item not found in shopping list"
 }
 ```
@@ -2664,19 +2718,22 @@ Authorization: Bearer user.token.here
 | `200` | Item removed successfully |
 | `401` | No token |
 | `403` | Bad or expired token |
-| `404` | Item not found in shopping list |
+| `404` | Shopping list not found or item not found |
 | `500` | Internal server error |
 
 ---
 
 ### Toggle Item Checked Status
-**PATCH** `/api/shopping-lists/:listId/items/:itemId`
+**PATCH** `/api/shopping-lists/:listId/items/:itemId/toggle`
 
 Toggle the checked/unchecked status of an item in a shopping list.
 
+**Authentication Required**: Yes (JWT token)
+**Validates Ownership**: Yes
+
 *Toggle item with ID = 5 in list with ID = 1:*
 ```
-http://localhost:3000/api/shopping-lists/1/items/5
+http://localhost:3000/api/shopping-lists/1/items/5/toggle
 ```
 
 #### Request Body 
@@ -2723,6 +2780,11 @@ Authorization: Bearer user.token.here
 **Code:** `404 Not Found`
 ```json
 {
+    "error": "Shopping list not found or access denied"
+}
+```
+```json
+{
     "error": "Item not found in shopping list"
 }
 ```
@@ -2742,7 +2804,7 @@ Authorization: Bearer user.token.here
 | `200` | Item status toggled successfully |
 | `401` | No token |
 | `403` | Bad or expired token |
-| `404` | Item not found in shopping list |
+| `404` | Shopping list not found or item not found |
 | `500` | Internal server error |
 
 ---

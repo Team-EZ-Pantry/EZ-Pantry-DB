@@ -11,6 +11,12 @@ async function createShoppingList(req, res) {
   try {
     const userId = req.user.userId;
     const { list_name } = req.body;
+
+    // Validate list_name is required and not empty
+    if (!list_name || list_name.trim() === '') {
+      return res.status(400).json({ error: 'list_name is required and cannot be empty' });
+    }
+
     const newShoppingList = await shoppingListModel.createShoppingList(userId, list_name);
     res.status(201).json(newShoppingList);
   } catch (error) {
@@ -38,10 +44,10 @@ async function getAllShoppingLists(req, res) {
 // *************************************
 async function getShoppingList(req, res) {
   try {
-    const userId = req.user.userId;
     const { listId } = req.params;
+    const userId = req.user.userId;
 
-    const shoppingList = await shoppingListModel.getShoppingList(listId);
+    const shoppingList = await shoppingListModel.getShoppingList(listId, userId);
     if (!shoppingList) {
       return res.status(404).json({ error: 'Shopping list not found' });
     }
@@ -77,18 +83,18 @@ async function deleteShoppingList(req, res) {   // make sure you also delete all
 async function createAndAddShoppingListItem(req, res) {
   try {
      const { listId } = req.params;
-     const { productId, customProductId, text, quantity } = req.body;
+     const { product_id, custom_product_id, text, quantity } = req.body;
     
     // Validate: can't have both productId and customProductId
-    if (productId && customProductId) {
+    if (product_id && custom_product_id) {
       return res.status(400).json({ 
-        error: 'Cannot provide both productId and customProductId' 
+        error: 'Cannot provide both product_id and custom_product_id for the same item' 
       });
     }
 
     // Validate: must provide at least one of productId, customProductId, or text
-    if(!productId && !customProductId && !text) {
-      return  res.status(400).json({ error: 'Must provide productId, customProductId, or text to add an item' });
+    if(!product_id && !custom_product_id && !text) {
+      return  res.status(400).json({ error: 'Must provide product_id, custom_product_id, or text to add an item' });
     }
     
     // Optional: Validate quantity if provided
@@ -99,7 +105,7 @@ async function createAndAddShoppingListItem(req, res) {
     }
 
     // If text-only item, ensure it's not empty
-    if (!productId && !customProductId && text) {
+    if (!product_id && !custom_product_id && text) {
     if (text.trim() === '') {
       return res.status(400).json({ 
         error: 'Text cannot be empty' 
@@ -107,32 +113,12 @@ async function createAndAddShoppingListItem(req, res) {
     }
   }
 
-    // Custom product validation block to be added later (pantry sharing sprint)
-    /*
-    // Validate custom product exists AND user owns it (if provided)
-    if (customProductId) {
-      const customProduct = await productModel.getCustomProductById(customProductId);
-      
-      if (!customProduct) {
-        return res.status(404).json({ 
-          error: 'Custom product not found' 
-        });
-      }
-
-      // Check ownership (user must own the custom product)
-      if (customProduct.user_id !== userId) {
-        return res.status(403).json({ 
-          error: 'You do not have access to this custom product' 
-        });
-      }
-    */
-
     const newItem = await shoppingListModel.createAndAddShoppingListItem(
       listId, 
-      productId || null,
-      customProductId || null,
+      product_id || null,
+      custom_product_id || null,
       text || null,
-      quantity
+      quantity || null,
     );
 
     res.status(201).json(newItem);
