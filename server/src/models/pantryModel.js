@@ -14,10 +14,10 @@ async function verifyPantryOwnership(pantryId, userId) {
 }
 
 // Create a new pantry associated with a user
-async function createPantry(userId, name) {
+async function createPantry(userId, pantryName) {
   const result = await pool.query(
-    'INSERT INTO pantry (user_id, name) VALUES ($1, $2) RETURNING *',
-    [userId, name]
+    'INSERT INTO pantry (user_id, pantry_name) VALUES ($1, $2) RETURNING *',
+    [userId, pantryName]
   );
   return result.rows[0];
 }
@@ -99,10 +99,10 @@ async function getPantryWithProducts(pantryId, userId, sortBy, category) {
 }
 
 // Update a pantry's name
-async function updatePantryName(pantryId, userId, name) {
+async function updatePantryName(pantryId, userId, pantryName) {
   const result = await pool.query(
-    'UPDATE pantry SET name = $1 WHERE pantry_id = $2 AND user_id = $3 RETURNING *',
-    [name, pantryId, userId]
+    'UPDATE pantry SET pantry_name = $1 WHERE pantry_id = $2 AND user_id = $3 RETURNING *',
+    [pantryName, pantryId, userId]
   );
   return result.rows[0];
 }
@@ -128,11 +128,11 @@ async function deletePantry(pantryId, userId) {
 // *     Pantry Product Functions      *
 // *************************************
 
-// *********************************************************
-// *              Add a product to a pantry                *
-// *        If product exists, increment quantity          *
-// * If product doesn't exist, create it in pantry_product *
-// *********************************************************
+// **********************************************************
+// *               Add a product to a pantry                *
+// * If product exists, increment quantity, update added_at *
+// * If product doesn't exist, create it in pantry_product  *
+// **********************************************************
 async function addProductToPantry(pantryId, productId, customProductId, quantity, expirationDate) {
   // Check if product already in this pantry
   const exists = await pool.query(
@@ -158,6 +158,7 @@ async function addProductToPantry(pantryId, productId, customProductId, quantity
          OR 
          (custom_product_id = $5 AND $5 IS NOT NULL)
        )
+       SET added_at = CURRENT_TIMESTAMP
        RETURNING *`,
       [quantity, expirationDate, pantryId, productId, customProductId]
     );
@@ -196,6 +197,7 @@ async function removeProductFromPantry(pantryId, productId, customProductId) {
 }
 
 // Update product quantity in pantry (Products won't be removed when quantity goes to zero)
+// added_at is updated to reflect the change time
 async function updateProductQuantity(pantryId, productId, customProductId, quantity) {
   const result = await pool.query(
     `UPDATE pantry_product 
@@ -206,6 +208,7 @@ async function updateProductQuantity(pantryId, productId, customProductId, quant
        OR 
        (custom_product_id = $4 AND $4 IS NOT NULL)
      )
+     SET added_at = CURRENT_TIMESTAMP
      RETURNING *`,
     [quantity, pantryId, productId, customProductId]
   );

@@ -9,15 +9,15 @@ const pantryModel = require('../models/pantryModel');
 // *************************************
 async function createPantry(req, res) {
   try {
-    const { name } = req.body;
+    const { pantry_name } = req.body;
     const userId = req.user.userId;
 
     // Validate input
-    if (!name || name.trim() === '') {
+    if (!pantry_name || pantry_name.trim() === '') {
       return res.status(400).json({ error: 'Pantry name is required' });
     }
 
-    const newPantry = await pantryModel.createPantry(userId, name);
+    const newPantry = await pantryModel.createPantry(userId, pantry_name);
 
     res.status(201).json({pantry: newPantry});
   } catch (error) {
@@ -104,14 +104,14 @@ async function updatePantryLastVisited(req, res) {
 async function updatePantryName(req, res) {
   try {
     const { pantryId } = req.params;
-    const { name } = req.body;
+    const { pantry_name } = req.body;
     const userId = req.user.userId;
 
-    if (!name || name.trim() === '') {
-      return res.status(400).json({ error: 'Name is required' });
+    if (!pantry_name || pantry_name.trim() === '') {
+      return res.status(400).json({ error: 'Pantry name is required' });
     }
 
-    const result = await pantryModel.updatePantryName(pantryId, userId, name);
+    const result = await pantryModel.updatePantryName(pantryId, userId, pantry_name);
 
     res.json({ message: 'Pantry name updated', pantry: result });
   } catch (error) {

@@ -33,17 +33,17 @@ app.get('/health', async (req, res) => {
 // *           API Routes              *
 // *************************************
 const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/user');
-const pantryRoutes = require('./routes/pantry');
-const productRoutes = require('./routes/product');
-const shoppingListRoutes = require('./routes/shoppingList');
-const recipeRoutes = require('./routes/recipe');
+const userRoutes = require('./routes/users');
+const pantryRoutes = require('./routes/pantries');
+const productRoutes = require('./routes/products');
+const shoppingListRoutes = require('./routes/shoppingLists');
+const recipeRoutes = require('./routes/recipes');
 
 app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/pantry', pantryRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/pantries', pantryRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/shopping-list', shoppingListRoutes);
+app.use('/api/shopping-lists', shoppingListRoutes);
 app.use('/api/recipes', recipeRoutes);
 
 // *************************************
