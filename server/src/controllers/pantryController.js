@@ -33,11 +33,30 @@ async function getAllPantries(req, res) {
   try {
     const userId = req.user.userId; // From authenticated token
     const pantries = await pantryModel.getPantriesByUserId(userId);
-    
+
     res.json({pantries});
   } catch (error) {
     console.error('Get pantries error:', error);
     res.status(500).json({ error: 'Failed to retrieve pantries' });
+  }
+}
+
+// **************************************
+// *  Get Most Recently Visited Pantry  *
+// **************************************
+async function getLastVisitedPantry(req, res) {
+  try {
+    const userId = req.user.userId;
+    const pantry = await pantryModel.getLastVisitedPantry(userId);
+
+    if (!pantry) {
+      return res.status(404).json({ error: 'No pantries found' });
+    }
+
+    res.json({ pantry });
+  } catch (error) {
+    console.error('Get last visited pantry error:', error);
+    res.status(500).json({ error: 'Failed to retrieve last visited pantry' });
   }
 }
 
@@ -81,23 +100,6 @@ async function getPantry(req, res) {
   }
 }
 
-// **********************************************************
-// *     h8Update the Last Visited timestamp of a Pantry    *
-// **********************************************************
-async function updatePantryLastVisited(req, res) {
-  try {
-    const { pantryId } = req.params;
-    const userId = req.user.userId;
-
-    const result = await pantryModel.updatePantryLastVisited(pantryId, userId);
-
-    res.json({ message: 'Pantry last visited timestamp updated', pantry: result });
-  } catch (error) {
-    console.error('Update pantry last visited error:', error);
-    res.status(500).json({ error: 'Failed to update pantry last visited timestamp' });
-  }
-}
-
 // *************************************
 // *      Update A Pantry's Name       *
 // *************************************
@@ -111,12 +113,30 @@ async function updatePantryName(req, res) {
       return res.status(400).json({ error: 'Pantry name is required' });
     }
 
-    const result = await pantryModel.updatePantryName(pantryId, userId, pantry_name);
+    const pantry = await pantryModel.updatePantryName(pantryId, userId, pantry_name);
 
-    res.json({ message: 'Pantry name updated', pantry: result });
+    res.json({ pantry });
   } catch (error) {
     console.error('Update pantry name error:', error);
     res.status(500).json({ error: 'Failed to update pantry name' });
+  }
+}
+
+
+// **********************************************************
+// *      Update the Last Visited timestamp of a Pantry     *
+// **********************************************************
+async function updatePantryLastVisited(req, res) {
+  try {
+    const { pantryId } = req.params;
+    const userId = req.user.userId;
+
+    const result = await pantryModel.updatePantryLastVisited(pantryId, userId);
+
+    res.json({ last_visited: result.last_visited });
+  } catch (error) {
+    console.error('Update pantry last visited error:', error);
+    res.status(500).json({ error: 'Failed to update pantry last visited timestamp' });
   }
 }
 
@@ -134,10 +154,7 @@ async function deletePantry(req, res) {
       return res.status(404).json({ error: 'Pantry not found' });
     }
 
-    res.json({
-      message: 'Pantry deleted successfully',
-      pantry: deletedPantry
-    });
+    res.json({message: 'Pantry deleted successfully'});
   } catch (error) {
     console.error('Delete pantry error:', error);
     res.status(500).json({ error: 'Failed to delete pantry' });
@@ -161,7 +178,7 @@ async function addProduct(req, res) {
     }
 
     // Add product to pantry
-    const result = await pantryModel.addProductToPantry(
+    const pantry_product = await pantryModel.addProductToPantry(
       pantryId,
       productId,
       null, // No custom product ID
@@ -169,10 +186,7 @@ async function addProduct(req, res) {
       expirationDate || null
     );
 
-    res.status(201).json({
-      message: 'Product added to pantry',
-      product: result
-    });
+    res.status(201).json({ pantry_product });
   } catch (error) {
     if (error.code === '23503') { // foreign key violation
       return res.status(404).json({ error: 'Product ID does not exist' });
@@ -198,10 +212,7 @@ async function removeProduct(req, res) {
       return res.status(404).json({ error: 'Product not found in pantry' });
     }
 
-    res.json({
-      message: 'Product removed from pantry',
-      product: result
-    });
+    res.json({message: 'Product removed successfully'});
   } catch (error) {
     if (error.code === '23503') { // foreign key violation
       return res.status(404).json({ error: 'Invalid product ID' });
@@ -224,21 +235,18 @@ async function updateProductQuantity(req, res) {
       return res.status(400).json({ error: 'Quantity is required' });
     }
 
-    const result = await pantryModel.updateProductQuantity(
-      pantryId, 
+    const pantry_product = await pantryModel.updateProductQuantity(
+      pantryId,
       productId,
       null,  // no custom product ID
       quantity
     );
 
-    if (!result) {
+    if (!pantry_product) {
       return res.status(404).json({ error: 'Product not found in pantry' });
     }
 
-    res.json({
-      message: 'Product quantity updated',
-      product: result
-    });
+    res.json({ pantry_product });
   } catch (error) {
     console.error('Update quantity error:', error);
     res.status(500).json({ error: 'Failed to update product quantity' });
@@ -258,21 +266,18 @@ async function updateProductExpiration(req, res) {
       return res.status(400).json({ error: 'Expiration date is required' });
     }
 
-    const result = await pantryModel.updateProductExpiration(
-      pantryId, 
+    const pantry_product = await pantryModel.updateProductExpiration(
+      pantryId,
       productId,
-      null,  // no custom product ID 
+      null,  // no custom product ID
       expirationDate
     );
 
-    if (!result) {
+    if (!pantry_product) {
       return res.status(404).json({ error: 'Product not found in pantry' });
     }
 
-    res.json({
-      message: 'Product expiration date updated',
-      product: result
-    });
+    res.json({ pantry_product });
   } catch (error) {
     console.error('Update expiration error:', error);
     res.status(500).json({ error: 'Failed to update product expiration' });
@@ -295,8 +300,7 @@ async function addCustomProduct(req, res) {
       return res.status(400).json({ error: 'Quantity must be greater than 0' });
     }
 
-    // Same shared function, different parameters!
-    const result = await pantryModel.addProductToPantry(
+    const pantry_product = await pantryModel.addProductToPantry(
       pantryId,
       null,              // No regular product ID
       customProductId,   // custom product ID
@@ -304,10 +308,7 @@ async function addCustomProduct(req, res) {
       expirationDate || null
     );
 
-    res.status(201).json({
-      message: 'Custom product added to pantry',
-      product: result
-    });
+    res.status(201).json({ pantry_product });
   } catch (error) {
     console.error('Add custom product error:', error);
     res.status(500).json({ error: 'Failed to add custom product' });
@@ -331,7 +332,7 @@ async function removeCustomProduct(req, res) {
       return res.status(404).json({ error: 'Custom product not found in pantry' });
     }
 
-    res.json({ message: 'Custom product removed', product: result });
+    res.json({ message: 'Custom product removed successfully'});
   } catch (error) {
     console.error('Remove custom product error:', error);
     res.status(500).json({ error: 'Failed to remove custom product' });
@@ -350,14 +351,14 @@ async function updateCustomProductQuantity(req, res) {
       return res.status(400).json({ error: 'Quantity is required' });
     }
 
-    const result = await pantryModel.updateProductQuantity(
+    const pantry_product = await pantryModel.updateProductQuantity(
       pantryId,
       null,
       customProductId,
       quantity
     );
 
-    res.json({ message: 'Quantity updated', product: result });
+    res.json({ pantry_product });
   } catch (error) {
     console.error('Update quantity error:', error);
     res.status(500).json({ error: 'Failed to update quantity' });
@@ -377,21 +378,18 @@ async function updateCustomProductExpiration(req, res) {
       return res.status(400).json({ error: 'Expiration date is required' });
     }
 
-    const result = await pantryModel.updateProductExpiration(
-      pantryId, 
-      null, // no regular product ID 
-      customProductId,  
+    const pantry_product = await pantryModel.updateProductExpiration(
+      pantryId,
+      null, // no regular product ID
+      customProductId,
       expirationDate
     );
 
-    if (!result) {
+    if (!pantry_product) {
       return res.status(404).json({ error: 'Product not found in pantry' });
     }
 
-    res.json({
-      message: 'Product expiration date updated',
-      product: result
-    });
+    res.json({ pantry_product });
   } catch (error) {
     console.error('Update expiration error:', error);
     res.status(500).json({ error: 'Failed to update product expiration' });
@@ -403,6 +401,7 @@ module.exports = {
   createPantry,
   getAllPantries,
   getPantry,
+  getLastVisitedPantry,
   updatePantryName,
   updatePantryLastVisited,
   deletePantry,

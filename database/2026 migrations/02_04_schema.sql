@@ -1,7 +1,8 @@
 -- ================================================================================
--- Updated schema: 2025-02-04
+-- Updated schema: 2026-02-05
 -- Added recipe tables, pantry last visited, theme preferences, naming consistency
 --      Routes use plural names. "name" -> "pantry_name" / "list_name"
+-- Added updated_at to pantry table
 -- ================================================================================
 
 -- Enable extensions
@@ -73,7 +74,8 @@ CREATE TABLE pantry (
     user_id INT REFERENCES app_user(user_id) ON DELETE CASCADE,
     pantry_name TEXT NOT NULL,
     last_visited TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ================================================================

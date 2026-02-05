@@ -31,6 +31,18 @@ async function getPantriesByUserId(userId) {
   return result.rows;
 }
 
+// Get the most recently visited pantry for a user
+async function getLastVisitedPantry(userId) {
+  const result = await pool.query(
+    `SELECT * FROM pantry
+     WHERE user_id = $1
+     ORDER BY last_visited DESC
+     LIMIT 1`,
+    [userId]
+  );
+  return result.rows[0] || null;
+}
+
 // Get a pantry with its products
 async function getPantryWithProducts(pantryId, userId, sortBy, category) {
   // Verify pantry belongs to user
@@ -40,10 +52,10 @@ async function getPantryWithProducts(pantryId, userId, sortBy, category) {
   );
 
   if (pantry.rows.length === 0) {
-    return null; // Pantry not found or doesn't belong to user
+    return null;
   }
 
-  // Build ORDER BY clause based on sortBy parameter
+  // Build sortBy parameter clause
   const sortOptions = {
     'name_asc': 'ORDER BY COALESCE(p.product_name, cp.product_name) ASC',
     'name_desc': 'ORDER BY COALESCE(p.product_name, cp.product_name) DESC', 
@@ -57,8 +69,6 @@ async function getPantryWithProducts(pantryId, userId, sortBy, category) {
   const categoryFilter = category 
     ? `AND ($3 = ANY(COALESCE(p.categories, cp.categories)))`
     : '';
-  
-  // Also, maybe add Pagination? and Caching?
 
   // Query parameters
   const queryParams = [pantryId];
@@ -136,99 +146,128 @@ async function deletePantry(pantryId, userId) {
 async function addProductToPantry(pantryId, productId, customProductId, quantity, expirationDate) {
   // Check if product already in this pantry
   const exists = await pool.query(
-    `SELECT * FROM pantry_product 
-     WHERE pantry_id = $1 
+    `SELECT * FROM pantry_product
+     WHERE pantry_id = $1
      AND (
        (product_id = $2 AND $2 IS NOT NULL)
-       OR 
+       OR
        (custom_product_id = $3 AND $3 IS NOT NULL)
      )`,
     [pantryId, productId, customProductId]
   );
 
+  let result;
   if (exists.rows.length > 0) {
     // Product already exists, update quantity
-    const result = await pool.query(
-      `UPDATE pantry_product 
-       SET quantity = quantity + $1, 
-           expiration_date = $2 
-       WHERE pantry_id = $3 
+    result = await pool.query(
+      `UPDATE pantry_product
+       SET quantity = quantity + $1,
+           expiration_date = $2,
+           added_at = CURRENT_TIMESTAMP
+       WHERE pantry_id = $3
        AND (
          (product_id = $4 AND $4 IS NOT NULL)
-         OR 
+         OR
          (custom_product_id = $5 AND $5 IS NOT NULL)
        )
-       SET added_at = CURRENT_TIMESTAMP
        RETURNING *`,
       [quantity, expirationDate, pantryId, productId, customProductId]
     );
-    return result.rows[0];
   } else {
     // New product for this pantry
-    const result = await pool.query(
+    result = await pool.query(
       `INSERT INTO pantry_product (
-         pantry_id, 
-         product_id, 
-         custom_product_id, 
-         quantity, 
+         pantry_id,
+         product_id,
+         custom_product_id,
+         quantity,
          expiration_date
-       ) VALUES ($1, $2, $3, $4, $5) 
+       ) VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
       [pantryId, productId, customProductId, quantity, expirationDate]
     );
-    return result.rows[0];
   }
+
+  // Update pantry's updated_at
+  await pool.query(
+    'UPDATE pantry SET updated_at = CURRENT_TIMESTAMP WHERE pantry_id = $1',
+    [pantryId]
+  );
+
+  return result.rows[0];
 }
 
 // Remove a product from pantry
 async function removeProductFromPantry(pantryId, productId, customProductId) {
   const result = await pool.query(
-    `DELETE FROM pantry_product 
-    WHERE pantry_id = $1 
-    AND ( 
-    (product_id = $2 AND $2 IS NOT NULL)
-      OR 
-    (custom_product_id = $3 AND $3 IS NOT NULL) 
-    )
-    RETURNING *`,
+    `DELETE FROM pantry_product
+     WHERE pantry_id = $1
+     AND (
+       (product_id = $2 AND $2 IS NOT NULL)
+       OR
+       (custom_product_id = $3 AND $3 IS NOT NULL)
+     )
+     RETURNING *`,
     [pantryId, productId, customProductId]
   );
+
+  if (result.rows.length > 0) {
+    await pool.query(
+      'UPDATE pantry SET updated_at = CURRENT_TIMESTAMP WHERE pantry_id = $1',
+      [pantryId]
+    );
+  }
+
   return result.rows[0];
 }
 
 // Update product quantity in pantry (Products won't be removed when quantity goes to zero)
-// added_at is updated to reflect the change time
 async function updateProductQuantity(pantryId, productId, customProductId, quantity) {
   const result = await pool.query(
-    `UPDATE pantry_product 
-     SET quantity = $1 
-     WHERE pantry_id = $2 
+    `UPDATE pantry_product
+     SET quantity = $1
+     WHERE pantry_id = $2
      AND (
        (product_id = $3 AND $3 IS NOT NULL)
-       OR 
+       OR
        (custom_product_id = $4 AND $4 IS NOT NULL)
      )
-     SET added_at = CURRENT_TIMESTAMP
      RETURNING *`,
     [quantity, pantryId, productId, customProductId]
   );
+
+  if (result.rows.length > 0) {
+    await pool.query(
+      'UPDATE pantry SET updated_at = CURRENT_TIMESTAMP WHERE pantry_id = $1',
+      [pantryId]
+    );
+  }
+
   return result.rows[0];
 }
 
 // Update product expiration date
 async function updateProductExpiration(pantryId, productId, customProductId, expirationDate) {
   const result = await pool.query(
-    `UPDATE pantry_product 
-     SET expiration_date = $1 
-     WHERE pantry_id = $2 
+    `UPDATE pantry_product
+     SET expiration_date = $1
+     WHERE pantry_id = $2
      AND (
        (product_id = $3 AND $3 IS NOT NULL)
-       OR 
+       OR
        (custom_product_id = $4 AND $4 IS NOT NULL)
      )
      RETURNING *`,
     [expirationDate, pantryId, productId, customProductId]
   );
+
+  if (result.rows.length > 0) {
+    await pool.query(
+      'UPDATE pantry SET updated_at = CURRENT_TIMESTAMP WHERE pantry_id = $1',
+      [pantryId]
+    );
+  }
+
   return result.rows[0];
 }
 
@@ -237,6 +276,7 @@ module.exports = {
   verifyPantryOwnership,
   getPantriesByUserId,
   getPantryWithProducts,
+  getLastVisitedPantry,
   createPantry,
   updatePantryName,
   updatePantryLastVisited,
