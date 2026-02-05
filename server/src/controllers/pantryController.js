@@ -3,6 +3,7 @@
 // *************************************
 
 const pantryModel = require('../models/pantryModel');
+const { validateExpirationDate } = require('../utils/dateValidator');
 
 // *************************************
 // *       Create a New Pantry         *
@@ -171,10 +172,16 @@ async function deletePantry(req, res) {
 async function addProduct(req, res) {
   try {
     const { productId, pantryId } = req.params;
-    const { quantity, expirationDate } = req.body;
+    const { quantity, expiration_date } = req.body;
 
     if (!quantity || quantity <= 0) {
       return res.status(400).json({ error: 'Quantity must be greater than 0' });
+    }
+
+    // Validate expiration date if provided
+    const dateValidation = validateExpirationDate(expiration_date);
+    if (!dateValidation.isValid) {
+      return res.status(400).json({ error: dateValidation.error });
     }
 
     // Add product to pantry
@@ -183,7 +190,7 @@ async function addProduct(req, res) {
       productId,
       null, // No custom product ID
       quantity,
-      expirationDate || null
+      dateValidation.normalizedDate
     );
 
     res.status(201).json({ pantry_product });
@@ -259,18 +266,23 @@ async function updateProductQuantity(req, res) {
 async function updateProductExpiration(req, res) {
   try {
     const { pantryId, productId } = req.params;
-    const { expirationDate } = req.body;
+    const { expiration_date } = req.body;
 
-    // Validate input
-    if (!expirationDate) {
-      return res.status(400).json({ error: 'Expiration date is required' });
+    if (expiration_date === undefined) {
+      return res.status(400).json({ error: 'expiration_date field is required' });
+    }
+
+    // Validate expiration date format (empty string clears the date)
+    const dateValidation = validateExpirationDate(expiration_date);
+    if (!dateValidation.isValid) {
+      return res.status(400).json({ error: dateValidation.error });
     }
 
     const pantry_product = await pantryModel.updateProductExpiration(
       pantryId,
       productId,
       null,  // no custom product ID
-      expirationDate
+      dateValidation.normalizedDate  // null if empty string passed
     );
 
     if (!pantry_product) {
@@ -294,10 +306,16 @@ async function updateProductExpiration(req, res) {
 async function addCustomProduct(req, res) {
   try {
     const { pantryId, customProductId } = req.params;
-    const { quantity, expirationDate } = req.body;
+    const { quantity, expiration_date } = req.body;
 
     if (!quantity || quantity < 1) {
       return res.status(400).json({ error: 'Quantity must be greater than 0' });
+    }
+
+    // Validate expiration date if provided
+    const dateValidation = validateExpirationDate(expiration_date);
+    if (!dateValidation.isValid) {
+      return res.status(400).json({ error: dateValidation.error });
     }
 
     const pantry_product = await pantryModel.addProductToPantry(
@@ -305,7 +323,7 @@ async function addCustomProduct(req, res) {
       null,              // No regular product ID
       customProductId,   // custom product ID
       quantity,
-      expirationDate || null
+      dateValidation.normalizedDate
     );
 
     res.status(201).json({ pantry_product });
@@ -371,18 +389,23 @@ async function updateCustomProductQuantity(req, res) {
 async function updateCustomProductExpiration(req, res) {
   try {
     const { pantryId, customProductId } = req.params;
-    const { expirationDate } = req.body;
+    const { expiration_date } = req.body;
 
-    // Validate input
-    if (!expirationDate) {
-      return res.status(400).json({ error: 'Expiration date is required' });
+    if (expiration_date === undefined) {
+      return res.status(400).json({ error: 'expiration_date field is required' });
+    }
+
+    // Validate expiration date format (empty string clears the date)
+    const dateValidation = validateExpirationDate(expiration_date);
+    if (!dateValidation.isValid) {
+      return res.status(400).json({ error: dateValidation.error });
     }
 
     const pantry_product = await pantryModel.updateProductExpiration(
       pantryId,
       null, // no regular product ID
       customProductId,
-      expirationDate
+      dateValidation.normalizedDate  // null if empty string passed
     );
 
     if (!pantry_product) {
