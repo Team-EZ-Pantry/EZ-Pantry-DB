@@ -10,6 +10,7 @@ const { validateCustomProductAccess, validatePantryAccess } = require('../middle
 // Pantry management
 router.post('/', authenticateToken,                                      pantryController.createPantry);
 router.get('/', authenticateToken,                                       pantryController.getAllPantries);
+router.get('/last-visited', authenticateToken,                           pantryController.getLastVisitedPantry);
 router.get('/:pantryId', authenticateToken,                              pantryController.getPantry);
 router.patch('/:pantryId/name', authenticateToken, validatePantryAccess, pantryController.updatePantryName);
 router.patch('/:pantryId/last-visited', authenticateToken, validatePantryAccess, pantryController.updatePantryLastVisited);

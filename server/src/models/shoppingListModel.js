@@ -79,10 +79,11 @@ async function deleteShoppingList(userId, listId) {
 
 // Toggle the checked status of an item on a list
 async function toggleItemChecked(listId, itemId) {
-  // 1. Toggle the checked status
+  // 1. Toggle the checked status and update item's updated_at
   const updatedItemResult = await pool.query(
     `UPDATE shopping_list_item
-     SET checked = NOT COALESCE(checked, FALSE)
+     SET checked = NOT COALESCE(checked, FALSE),
+         updated_at = CURRENT_TIMESTAMP
      WHERE item_id = $1 AND list_id = $2
      RETURNING *`,
     [itemId, listId]
@@ -102,7 +103,7 @@ async function toggleItemChecked(listId, itemId) {
 
   const allChecked = completionCheck.rows[0].all_checked || false;
 
-  // 3. Update shopping_list.is_complete based on that result
+  // 3. Update shopping_list.is_complete and updated_at
   await pool.query(
     `UPDATE shopping_list
      SET is_complete = $1,
@@ -120,20 +121,36 @@ async function toggleItemChecked(listId, itemId) {
 async function createAndAddShoppingListItem(listId, productId, customProductId, text, quantity) {
   const result = await pool.query(
     `INSERT INTO shopping_list_item (list_id, product_id, custom_product_id, text, quantity)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING *`,
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING *`,
     [listId, productId, customProductId, text, quantity]
   );
-   return result.rows[0];
+
+  // Update shopping list's updated_at
+  await pool.query(
+    'UPDATE shopping_list SET updated_at = CURRENT_TIMESTAMP WHERE list_id = $1',
+    [listId]
+  );
+
+  return result.rows[0];
 }
 
 // Remove an item from a shopping list
 async function removeShoppingListItem(listId, itemId) {
-   const result = await pool.query(
-      'DELETE FROM shopping_list_item WHERE item_id = $1 AND list_id = $2 RETURNING *',
-      [itemId, listId]
-   );
-   return result.rows[0];
+  const result = await pool.query(
+    'DELETE FROM shopping_list_item WHERE item_id = $1 AND list_id = $2 RETURNING *',
+    [itemId, listId]
+  );
+
+  if (result.rows.length > 0) {
+    // Update shopping list's updated_at
+    await pool.query(
+      'UPDATE shopping_list SET updated_at = CURRENT_TIMESTAMP WHERE list_id = $1',
+      [listId]
+    );
+  }
+
+  return result.rows[0];
 }
 
 module.exports = {

@@ -19,6 +19,7 @@
   - [Pantry Endpoints](#pantry-endpoints)
     - [Create Pantry](#create-pantry)
     - [Get All Pantries for a User](#get-all-pantries-for-a-user)
+    - [Get Last Visited Pantry](#get-last-visited-pantry)
     - [Get Pantry](#get-pantry)
     - [Update Pantry Name](#update-pantry-name)
     - [Update Pantry Last Visited Timestamp](#update-pantry-last-visited-timestamp)
@@ -880,13 +881,13 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "Pantry created successfully",
     "pantry": {
         "pantry_id": 11,
         "user_id": 1,
         "pantry_name": "New Pantry",
         "last_visited": "2025-10-15T21:05:10.431Z",
-        "created_at": "2025-10-15T21:05:10.431Z"
+        "created_at": "2025-10-15T21:05:10.431Z",
+        "updated_at": "2025-10-15T21:05:10.431Z"
     }
 }
 ```
@@ -955,21 +956,22 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "Pantries retrieved successfully",
     "pantries": [
         {
             "pantry_id": 12,
             "user_id": 1,
             "pantry_name": "New",
             "last_visited": "2025-10-16T01:04:55.437Z",
-            "created_at": "2025-10-16T01:04:55.437Z"
+            "created_at": "2025-10-16T01:04:55.437Z",
+            "updated_at": "2025-10-16T01:04:55.437Z"
         },
         {
             "pantry_id": 6,
             "user_id": 1,
             "pantry_name": "Testy",
             "last_visited": "2025-10-13T02:59:57.153Z",
-            "created_at": "2025-10-13T02:59:57.153Z"
+            "created_at": "2025-10-13T02:59:57.153Z",
+            "updated_at": "2025-10-14T08:30:00.000Z"
         }
     ]
 }
@@ -1006,9 +1008,84 @@ Authorization: Bearer user.token.here
 #### Status Codes
 | Code | Description |
 |------|-------------|
-| `200` | Pantries retrieved sucessfully  |
+| `200` | Pantries retrieved successfully  |
 | `401` | No token |
 | `403` | Bad or expired token |
+| `500` | Internal server error |
+
+---
+
+### Get Last Visited Pantry
+**GET** `/api/pantries/last-visited`
+
+Get the most recently visited pantry for the authenticated user. Useful for reopening the app to the user's last active pantry.
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "pantry": {
+        "pantry_id": 12,
+        "user_id": 1,
+        "pantry_name": "Kitchen",
+        "last_visited": "2026-02-05T10:30:00.000Z",
+        "created_at": "2025-10-16T01:04:55.437Z",
+        "updated_at": "2026-02-05T09:15:00.000Z"
+    }
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "No pantries found"
+}
+```
+
+**Code** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to retrieve last visited pantry"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | Pantry retrieved successfully  |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | User has no pantries |
 | `500` | Internal server error |
 
 ---
@@ -1046,6 +1123,7 @@ Authorization: Bearer user.token.here
         "pantry_name": "pantry",
         "last_visited": "2025-11-07T02:41:17.481Z",
         "created_at": "2025-11-07T02:41:17.481Z",
+        "updated_at": "2025-11-11T04:33:41.318Z",
         "products": [
             {
                 "id": 9,
@@ -1148,13 +1226,13 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "Pantry name updated",
     "pantry": {
         "pantry_id": 13,
         "user_id": 2,
         "pantry_name": "My Pantry",
         "last_visited": "2025-10-16T01:22:09.581Z",
-        "created_at": "2025-10-16T01:22:09.581Z"
+        "created_at": "2025-10-16T01:22:09.581Z",
+        "updated_at": "2025-10-16T02:15:00.000Z"
     }
 }
 ```
@@ -1185,7 +1263,7 @@ Authorization: Bearer user.token.here
 }
 ```
 
-**Code:** `404 Bad Request`
+**Code:** `404 Not Found`
 ```json
 {
     "error": "Pantry not found"
@@ -1231,10 +1309,7 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "Pantry last visited timestamp updated",
-    "pantry": {
-        "last_visited": "2026-01-22T04:07:26.058Z"
-    }
+    "last_visited": "2026-01-22T04:07:26.058Z"
 }
 ```
 
@@ -1307,14 +1382,7 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "Pantry deleted successfully",
-    "pantry": {
-        "pantry_id": 11,
-        "user_id": 1,
-        "pantry_name": "New Pantry",
-        "last_visited": "2025-10-15T21:05:10.431Z",
-        "created_at": "2025-10-15T21:05:10.431Z"
-    }
+    "message": "Pantry deleted successfully"
 }
 ```
 
@@ -1322,8 +1390,6 @@ Authorization: Bearer user.token.here
 
 <details>
 <summary>Click to view all error codes</summary>
-
-
 
 **Code:** `401 Unauthorized`
 ```json
@@ -1398,13 +1464,13 @@ Authorization: Bearer user.token.here
 
 ```json
 {
-    "message": "Product added to pantry",
-    "product": {
+    "pantry_product": {
         "pantry_id": 13,
         "product_id": null,
         "custom_product_id": 2,
         "quantity": 3,
-        "expiration_date": "2026-10-10T00:00:00.000Z"
+        "expiration_date": "2026-10-10T00:00:00.000Z",
+        "added_at": "2025-10-16T01:22:09.581Z"
     }
 }
 ```
@@ -1478,13 +1544,7 @@ Authorization: Bearer user.token.here
 **Code:** `200 OK`
 ```json
 {
-    "message": "Product removed from pantry",
-    "product": {
-        "pantry_id": 13,
-        "product_id": 1,
-        "quantity": 3,
-        "expiration_date": "2026-10-10T05:00:00.000Z"
-    }
+    "message": "Product removed successfully"
 }
 ```
 
@@ -1510,7 +1570,7 @@ Authorization: Bearer user.token.here
 **Code:** `404 Not Found`
 ```json
 {
-    "error": "Pantry not found"
+    "error": "Product not found in pantry"
 }
 ```
 
@@ -1568,12 +1628,13 @@ Authorization: Bearer user.token.here
 **Code:** `200 OK`
 ```json
 {
-    "message": "Product quantity updated",
-    "product": {
+    "pantry_product": {
         "pantry_id": 13,
         "product_id": 1,
+        "custom_product_id": null,
         "quantity": 9,
-        "expiration_date": null
+        "expiration_date": null,
+        "added_at": "2025-10-16T01:22:09.581Z"
     }
 }
 ```
@@ -1607,7 +1668,7 @@ Authorization: Bearer user.token.here
 **Code:** `404 Not Found`
 ```json
 {
-    "error": "Pantry not found"
+    "error": "Pantry not found or access denied"
 }
 ```
 
@@ -1634,8 +1695,7 @@ Authorization: Bearer user.token.here
 | `400` | Quantity not provided |
 | `401` | No token |
 | `403` | Bad or expired token |
-| `404` | Pantry not found |
-| `404` | Product not found in pantry |
+| `404` | Pantry or product not found |
 | `500` | Internal server error |
 
 ---
@@ -1666,12 +1726,13 @@ Authorization: Bearer user.token.here
 **Code:** `200 OK`
 ```json
 {
-    "message": "Product expiration date updated",
-    "product": {
+    "pantry_product": {
         "pantry_id": 13,
         "product_id": 1,
+        "custom_product_id": null,
         "quantity": 9,
-        "expiration_date": "2067-11-11T06:00:00.000Z"
+        "expiration_date": "2067-11-11T06:00:00.000Z",
+        "added_at": "2025-10-16T01:22:09.581Z"
     }
 }
 ```
