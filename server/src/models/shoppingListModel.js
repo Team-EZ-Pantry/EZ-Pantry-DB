@@ -14,7 +14,7 @@ async function createShoppingList(userId, listName) {
 }
 
 // Get all of a user's shopping lists
-async function getAllShoppingLists(userId) {
+async function getShoppingListsByUserId(userId) {
   const result = await pool.query(
     'SELECT * FROM shopping_list WHERE user_id = $1 ORDER BY created_at DESC',
     [userId]
@@ -32,8 +32,7 @@ async function verifyShoppingListOwnership(listId, userId) {
 }
 
 // Get a specific shopping list for a user
-async function getShoppingList(listId, userId) {
-  // Verify shopping list belongs to user
+async function getShoppingListById(listId, userId) {
   const list = await pool.query(
     'SELECT * FROM shopping_list WHERE list_id = $1 AND user_id = $2',
     [listId, userId]
@@ -43,52 +42,29 @@ async function getShoppingList(listId, userId) {
     return null;
   }
 
-  const result = await pool.query(
+  const items = await pool.query(
     `SELECT
-       shopping_list.list_id,
-       shopping_list.list_name,
-       shopping_list.is_complete,
-       shopping_list.created_at,
-       shopping_list.updated_at,
-       shopping_list_item.item_id,
-       shopping_list_item.product_id,
-       shopping_list_item.custom_product_id,
-       shopping_list_item.text,
-       shopping_list_item.quantity,
-       shopping_list_item.checked,
-       shopping_list_item.created_at AS item_created_at,
-       shopping_list_item.updated_at AS item_updated_at,
-       product.product_name,
-       custom_product.product_name AS custom_product_name
-     FROM shopping_list
-     LEFT JOIN shopping_list_item ON shopping_list.list_id = shopping_list_item.list_id
-     LEFT JOIN product ON shopping_list_item.product_id = product.product_id
-     LEFT JOIN custom_product ON shopping_list_item.custom_product_id = custom_product.custom_product_id
-     WHERE shopping_list.list_id = $1
-     ORDER BY shopping_list_item.created_at DESC`,
+       sli.item_id,
+       sli.product_id,
+       sli.custom_product_id,
+       sli.text,
+       sli.quantity,
+       sli.checked,
+       sli.created_at,
+       sli.updated_at,
+       p.product_name,
+       cp.product_name AS custom_product_name
+     FROM shopping_list_item sli
+     LEFT JOIN product p ON sli.product_id = p.product_id
+     LEFT JOIN custom_product cp ON sli.custom_product_id = cp.custom_product_id
+     WHERE sli.list_id = $1
+     ORDER BY sli.created_at DESC`,
     [listId]
   );
 
-  
-  const firstRow = result.rows[0];
   return {
-    list_id: firstRow.list_id,
-    list_name: firstRow.list_name,
-    is_complete: firstRow.is_complete,
-    created_at: firstRow.created_at,
-    updated_at: firstRow.updated_at,
-    shopping_list_items: result.rows.map(row => ({
-        item_id: row.item_id,
-        product_id: row.product_id,
-        custom_product_id: row.custom_product_id,
-        text: row.text,
-        quantity: row.quantity,
-        checked: row.checked,
-        created_at: row.item_created_at,
-        updated_at: row.item_updated_at,
-        product_name: row.product_name,
-        custom_product_name: row.custom_product_name
-      }))
+    ...list.rows[0],
+    shopping_list_items: items.rows
   };
 }
 
@@ -162,8 +138,8 @@ async function removeShoppingListItem(listId, itemId) {
 
 module.exports = {
   createShoppingList,
-  getAllShoppingLists,
-  getShoppingList,
+  getShoppingListsByUserId,
+  getShoppingListById,
   verifyShoppingListOwnership,
   deleteShoppingList,
   toggleItemChecked,

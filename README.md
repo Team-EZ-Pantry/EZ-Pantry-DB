@@ -1016,7 +1016,7 @@ Authorization: Bearer user.token.here
 ### Get Pantry
 **GET** `/api/pantries/:pantryid?sort=name_asc`
 
-Get a specific pantry by ID. Pantry contents can be sorted by by name and date and filtered by category*. Sorting can be done for the entire pantry or within categories*.
+Get a specific pantry by ID. Pantry contents can be sorted by by name and date and filtered by category*. Sorting can be done for the entire pantry or within categories*. If the pantry has no products, `products` will be an empty array `[]`.
 
 *coming soon
 #### Query Parameters
@@ -2341,7 +2341,7 @@ Authorization: Bearer user.token.here
 ### Get Shopping List
 **GET** `/api/shopping-lists/:listId`
 
-Get a specific shopping list by ID with all its items.
+Get a specific shopping list by ID with all its items. If the shopping list has no items, `shopping_list_items` will be an empty array `[]`.
 
 **Authentication Required**: Yes (JWT token)
 **Validates Ownership**: Yes
@@ -2361,9 +2361,9 @@ Authorization: Bearer user.token.here
 {
     "list_id": 1,
     "list_name": "Weekly Groceries",
-    "is_complete": false,
     "created_at": "2025-11-01T10:00:00.000Z",
     "updated_at": "2025-11-01T10:00:00.000Z",
+    "is_complete": false,
     "shopping_list_items": [
         {
             "item_id": 1,
@@ -3080,7 +3080,7 @@ Authorization: Bearer user.token.here
 ### Get Recipe
 **GET** `/api/recipes/:recipeId?scale=4`
 
-Get a specific recipe with ingredients and instructions. Optionally scale ingredient quantities for a different number of servings.
+Get a specific recipe with ingredients and instructions. Optionally scale ingredient quantities for a different number of servings. If the recipe has no ingredients or instructions, `ingredients` and `instructions` will be empty arrays `[]`.
 
 #### Query Parameters
 

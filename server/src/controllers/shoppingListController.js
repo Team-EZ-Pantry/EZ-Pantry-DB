@@ -31,7 +31,7 @@ async function createShoppingList(req, res) {
 async function getAllShoppingLists(req, res) {
   try {
     const userId = req.user.userId;
-    const shoppingLists = await shoppingListModel.getAllShoppingLists(userId);
+    const shoppingLists = await shoppingListModel.getShoppingListsByUserId(userId);
     res.json(shoppingLists);
   } catch (error) {
     console.error('Get all shopping lists error:', error);
@@ -47,7 +47,7 @@ async function getShoppingList(req, res) {
     const { listId } = req.params;
     const userId = req.user.userId;
 
-    const shoppingList = await shoppingListModel.getShoppingList(listId, userId);
+    const shoppingList = await shoppingListModel.getShoppingListById(listId, userId);
     if (!shoppingList) {
       return res.status(404).json({ error: 'Shopping list not found' });
     }
@@ -61,7 +61,7 @@ async function getShoppingList(req, res) {
 // *************************************
 // *       Delete a shopping list      *
 // *************************************
-async function deleteShoppingList(req, res) {   // make sure you also delete all associated items
+async function deleteShoppingList(req, res) {
   try {
     const userId = req.user.userId;
     const { listId } = req.params;
@@ -84,11 +84,11 @@ async function createAndAddShoppingListItem(req, res) {
   try {
      const { listId } = req.params;
      const { product_id, custom_product_id, text, quantity } = req.body;
-    
+
     // Validate: can't have both productId and customProductId
     if (product_id && custom_product_id) {
-      return res.status(400).json({ 
-        error: 'Cannot provide both product_id and custom_product_id for the same item' 
+      return res.status(400).json({
+        error: 'Cannot provide both product_id and custom_product_id for the same item'
       });
     }
 
@@ -96,25 +96,25 @@ async function createAndAddShoppingListItem(req, res) {
     if(!product_id && !custom_product_id && !text) {
       return  res.status(400).json({ error: 'Must provide product_id, custom_product_id, or text to add an item' });
     }
-    
+
     // Optional: Validate quantity if provided
     if (quantity !== undefined && (quantity < 1)) {
-      return res.status(400).json({ 
-        error: 'Quantity must be at least 1' 
+      return res.status(400).json({
+        error: 'Quantity must be at least 1'
       });
     }
 
     // If text-only item, ensure it's not empty
     if (!product_id && !custom_product_id && text) {
-    if (text.trim() === '') {
-      return res.status(400).json({ 
-        error: 'Text cannot be empty' 
-      });
+      if (text.trim() === '') {
+        return res.status(400).json({
+          error: 'Text cannot be empty'
+        });
+      }
     }
-  }
 
     const newItem = await shoppingListModel.createAndAddShoppingListItem(
-      listId, 
+      listId,
       product_id || null,
       custom_product_id || null,
       text || null,

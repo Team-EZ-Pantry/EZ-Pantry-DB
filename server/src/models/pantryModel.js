@@ -40,10 +40,10 @@ async function getPantryWithProducts(pantryId, userId, sortBy, category) {
   );
 
   if (pantry.rows.length === 0) {
-    return null; // Pantry not found or doesn't belong to user
+    return null;
   }
 
-  // Build ORDER BY clause based on sortBy parameter
+  // Build sortBy parameter clause
   const sortOptions = {
     'name_asc': 'ORDER BY COALESCE(p.product_name, cp.product_name) ASC',
     'name_desc': 'ORDER BY COALESCE(p.product_name, cp.product_name) DESC', 
@@ -57,8 +57,6 @@ async function getPantryWithProducts(pantryId, userId, sortBy, category) {
   const categoryFilter = category 
     ? `AND ($3 = ANY(COALESCE(p.categories, cp.categories)))`
     : '';
-  
-  // Also, maybe add Pagination? and Caching?
 
   // Query parameters
   const queryParams = [pantryId];
