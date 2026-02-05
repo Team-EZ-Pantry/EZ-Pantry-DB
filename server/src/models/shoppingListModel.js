@@ -153,6 +153,52 @@ async function removeShoppingListItem(listId, itemId) {
   return result.rows[0];
 }
 
+// Toggle all items in a shopping list (mark all complete or all incomplete)
+// If any item is unchecked, marks all as checked. If all are checked, marks all as unchecked.
+async function toggleAllItems(listId) {
+  // 1. Check if all items are currently checked
+  const statusCheck = await pool.query(
+    `SELECT
+       BOOL_AND(checked) AS all_checked,
+       COUNT(*) AS item_count
+     FROM shopping_list_item
+     WHERE list_id = $1`,
+    [listId]
+  );
+
+  const { all_checked, item_count } = statusCheck.rows[0];
+
+  // If no items, nothing to toggle
+  if (parseInt(item_count) === 0) {
+    return { toggled: false, new_state: null, item_count: 0 };
+  }
+
+  // 2. Determine new state: if all checked, uncheck all; otherwise check all
+  const newCheckedState = !all_checked;
+
+  // 3. Update all items
+  await pool.query(
+    `UPDATE shopping_list_item
+     SET checked = $1, updated_at = CURRENT_TIMESTAMP
+     WHERE list_id = $2`,
+    [newCheckedState, listId]
+  );
+
+  // 4. Update the shopping list's is_complete and updated_at
+  await pool.query(
+    `UPDATE shopping_list
+     SET is_complete = $1, updated_at = CURRENT_TIMESTAMP
+     WHERE list_id = $2`,
+    [newCheckedState, listId]
+  );
+
+  return {
+    toggled: true,
+    new_state: newCheckedState ? 'all_checked' : 'all_unchecked',
+    item_count: parseInt(item_count)
+  };
+}
+
 module.exports = {
   createShoppingList,
   getShoppingListsByUserId,
@@ -160,6 +206,7 @@ module.exports = {
   verifyShoppingListOwnership,
   deleteShoppingList,
   toggleItemChecked,
+  toggleAllItems,
   createAndAddShoppingListItem,
   removeShoppingListItem,
 };

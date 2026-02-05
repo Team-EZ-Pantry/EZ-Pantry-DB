@@ -165,6 +165,31 @@ async function removeShoppingListItem(req, res) {
    }
 }
 
+// *****************************************************
+// *   Toggle all items in a list (mark all complete)   *
+// *****************************************************
+async function toggleAllItems(req, res) {
+  try {
+    const { listId } = req.params;
+    const result = await shoppingListModel.toggleAllItems(listId);
+
+    if (!result.toggled) {
+      return res.status(200).json({ message: 'No items to toggle', item_count: 0 });
+    }
+
+    res.json({
+      message: result.new_state === 'all_checked'
+        ? 'All items marked as complete'
+        : 'All items marked as incomplete',
+      new_state: result.new_state,
+      item_count: result.item_count
+    });
+  } catch (error) {
+    console.error('Toggle all items error:', error);
+    res.status(500).json({ error: 'Failed to toggle all items' });
+  }
+}
+
 module.exports = {
   getAllShoppingLists,
   createShoppingList,
@@ -172,5 +197,6 @@ module.exports = {
   deleteShoppingList,
   createAndAddShoppingListItem,
   toggleItemChecked,
+  toggleAllItems,
   removeShoppingListItem
 };

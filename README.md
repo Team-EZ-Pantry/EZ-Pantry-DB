@@ -44,6 +44,7 @@
     - [Create and Add Item to Shopping List](#create-and-add-item-to-shopping-list)
     - [Remove Item from Shopping List](#remove-item-from-shopping-list)
     - [Toggle Item Checked Status](#toggle-item-checked-status)
+    - [Toggle All Items](#toggle-all-items)
   - [Recipe Endpoints](#recipe-endpoints)
     - [Create Recipe](#create-recipe)
     - [Get All Recipes](#get-all-recipes)
@@ -2866,6 +2867,101 @@ Authorization: Bearer user.token.here
 | `401` | No token |
 | `403` | Bad or expired token |
 | `404` | Shopping list not found or item not found |
+| `500` | Internal server error |
+
+---
+
+### Toggle All Items
+**PATCH** `/api/shopping-lists/:listId/items/toggle-all`
+
+Toggle all items in a shopping list. If any item is unchecked, marks all as checked. If all items are already checked, marks all as unchecked. The shopping list's `is_complete` status is automatically updated based on the new state.
+
+**Authentication Required**: Yes (JWT token)
+**Validates Ownership**: Yes
+
+*Toggle all items in list with ID = 1:*
+```
+http://localhost:3000/api/shopping-lists/1/items/toggle-all
+```
+
+#### Request Body
+None
+
+#### Request Header
+```
+Authorization: Bearer user.token.here
+```
+
+#### Success Response
+**Code:** `200 OK`
+
+```json
+{
+    "message": "All items marked as complete",
+    "new_state": "all_checked",
+    "item_count": 5
+}
+```
+
+Or if toggling from complete to incomplete:
+```json
+{
+    "message": "All items marked as incomplete",
+    "new_state": "all_unchecked",
+    "item_count": 5
+}
+```
+
+Or if the list has no items:
+```json
+{
+    "message": "No items to toggle",
+    "item_count": 0
+}
+```
+
+#### Error Responses
+
+<details>
+<summary>Click to view all error codes</summary>
+
+**Code:** `401 Unauthorized`
+```json
+{
+    "error": "Access denied. No token provided"
+}
+```
+
+**Code:** `403 Forbidden`
+```json
+{
+    "error": "Invalid or expired token"
+}
+```
+
+**Code:** `404 Not Found`
+```json
+{
+    "error": "Shopping list not found or access denied"
+}
+```
+
+**Code:** `500 Internal Server Error`
+```json
+{
+    "error": "Failed to toggle all items"
+}
+```
+
+</details>
+
+#### Status Codes
+| Code | Description |
+|------|-------------|
+| `200` | All items toggled successfully |
+| `401` | No token |
+| `403` | Bad or expired token |
+| `404` | Shopping list not found |
 | `500` | Internal server error |
 
 ---

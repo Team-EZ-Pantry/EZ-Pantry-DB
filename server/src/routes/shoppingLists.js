@@ -16,6 +16,7 @@ router.delete('/:listId', authenticateToken, validateShoppingListAccess, shoppin
 
 // Shopping list item endpoints
 router.post('/:listId/items/', authenticateToken, validateShoppingListAccess, shoppingListController.createAndAddShoppingListItem);
+router.patch('/:listId/items/toggle-all', authenticateToken, validateShoppingListAccess, shoppingListController.toggleAllItems);
 router.patch('/:listId/items/:itemId/toggle', authenticateToken, validateShoppingListAccess, shoppingListController.toggleItemChecked);
 router.delete('/:listId/items/:itemId', authenticateToken, validateShoppingListAccess, shoppingListController.removeShoppingListItem);
 
