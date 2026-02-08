@@ -45,6 +45,7 @@ async function getShoppingListById(listId, userId) {
   const items = await pool.query(
     `SELECT
        sli.item_id,
+       sli.list_id,
        sli.product_id,
        sli.custom_product_id,
        sli.text,
